@@ -8,13 +8,25 @@ let showMode = "en";
 let playMode = "normal";
 
 async function loadLibrary() {
-  const res = await fetch(API_URL);
-  library = await res.json();
+  try {
+    const res = await fetch(API_URL);
 
-  document.getElementById("count").innerText =
-    `${library.length} 筆`;
+    if (!res.ok) {
+      throw new Error("HTTP " + res.status);
+    }
 
-  nextSentence();
+    library = await res.json();
+
+    document.getElementById("count").innerText =
+      `${library.length} 筆`;
+
+    nextSentence();
+
+  } catch (e) {
+    console.error(e);
+    document.getElementById("english").innerText =
+      "錯誤：" + e.message;
+  }
 }
 
 function nextSentence() {
