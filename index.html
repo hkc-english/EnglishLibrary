@@ -1,53 +1,37 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
-
 <head>
-
 <meta charset="UTF-8">
-
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>English Library</title>
 
 <link rel="stylesheet" href="style.css">
 
 </head>
-
 <body>
 
 <div class="container">
 
-<h1>
+<h1>📚 English Library</h1>
 
-📚 English Library
-
-</h1>
+<div id="count"></div>
 
 <div class="toolbar">
 
-<button onclick="setMode('en')">
-
+<button onclick="changeShow('en')">
 英文
-
 </button>
 
-<button onclick="setMode('zh')">
-
+<button onclick="changeShow('zh')">
 中文
-
 </button>
 
-<button onclick="setMode('both')">
-
+<button onclick="changeShow('both')">
 英＋中
-
 </button>
 
-<button onclick="setMode('listen')">
-
+<button onclick="blindMode()">
 盲聽
-
 </button>
 
 </div>
@@ -55,29 +39,25 @@ content="width=device-width, initial-scale=1.0">
 <div id="card">
 
 <div id="english">
-
 Loading...
-
 </div>
 
-<div id="chinese">
-
-</div>
+<div id="chinese"></div>
 
 </div>
 
 <div class="controls">
 
 <button onclick="previousSentence()">
-
 ⬅ 上一句
+</button>
 
+<button onclick="speak()">
+🔊 播放
 </button>
 
 <button onclick="nextSentence()">
-
 下一句 ➡
-
 </button>
 
 </div>
@@ -87,5 +67,5 @@ Loading...
 <script src="app.js"></script>
 
 </body>
-
 </html>
+
