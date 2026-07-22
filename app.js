@@ -25,22 +25,26 @@ let showMode = "en";
 
 
 // 播放速度
+
 let speechRate = 0.7;
 
 
 // 系統英文語音
+
 let selectedVoice = null;
 
 
 // ========================================
-// 載入資料
+// 載入 Google Sheet 資料
 // ========================================
 
 async function loadLibrary() {
 
   try {
 
-    const response = await fetch(API_URL);
+    const response =
+      await fetch(API_URL);
+
 
     if (!response.ok) {
 
@@ -50,6 +54,7 @@ async function loadLibrary() {
 
     }
 
+
     const data =
       await response.json();
 
@@ -57,7 +62,7 @@ async function loadLibrary() {
     if (!Array.isArray(data)) {
 
       throw new Error(
-        "API 回傳資料不是陣列"
+        "API 回傳資料格式錯誤"
       );
 
     }
@@ -73,15 +78,34 @@ async function loadLibrary() {
     );
 
 
-    // 載入語音
-    loadVoices();
+    // 顯示資料筆數
+
+    const countElement =
+      document.getElementById(
+        "count"
+      );
+
+
+    if (countElement) {
+
+      countElement.innerText =
+        `${library.length} 筆`;
+
+    }
 
 
     // 從第一筆開始
+
     currentIndex = 0;
 
 
-    // 顯示資料
+    // 取得語音
+
+    loadVoices();
+
+
+    // 顯示第一筆
+
     render();
 
 
@@ -140,7 +164,7 @@ function loadVoices() {
   }
 
 
-  // 只找英文語音
+  // 找出所有英文語音
 
   const englishVoices =
     voices.filter(
@@ -161,12 +185,16 @@ function loadVoices() {
     englishVoices.length === 0
   ) {
 
+    console.log(
+      "找不到英文語音"
+    );
+
     return;
 
   }
 
 
-  // 優先使用常見英文語音
+  // 優先尋找較自然的英文語音
 
   const preferredNames = [
 
@@ -190,8 +218,6 @@ function loadVoices() {
 
   ];
 
-
-  // 尋找較自然的語音
 
   for (
     let i = 0;
@@ -254,7 +280,7 @@ function loadVoices() {
 
 
 // Safari / iPhone
-// 語音清單載入完成後重新取得
+// 語音清單載入後重新取得
 
 if (
   "speechSynthesis" in window
@@ -276,7 +302,6 @@ if (
 
 function render() {
 
-  // 沒有資料
   if (
     !library ||
     library.length === 0
@@ -287,7 +312,7 @@ function render() {
   }
 
 
-  // 確保 index 不超出範圍
+  // 確保索引正常
 
   if (
     currentIndex < 0
@@ -315,7 +340,7 @@ function render() {
     library[currentIndex];
 
 
-  // 取得畫面元素
+  // 取得畫面
 
   const english =
     document.getElementById(
@@ -339,25 +364,27 @@ function render() {
   }
 
 
-  // 每次先全部清空
+  // 每次重新顯示前先清空
 
   english.innerText = "";
 
   chinese.innerText = "";
 
 
-  // 取得文字
+  // 取得英文
 
   const englishText =
     current["英文"] || "";
 
+
+  // 取得中文
 
   const chineseText =
     current["中文"] || "";
 
 
   // ======================================
-  // 英文模式
+  // 英文
   // ======================================
 
   if (
@@ -371,7 +398,7 @@ function render() {
 
 
   // ======================================
-  // 中文模式
+  // 中文
   // ======================================
 
   else if (
@@ -385,7 +412,7 @@ function render() {
 
 
   // ======================================
-  // 英＋中模式
+  // 英＋中
   // ======================================
 
   else if (
@@ -402,15 +429,14 @@ function render() {
 
 
   // ======================================
-  // 盲聽模式
+  // 盲聽
   // ======================================
 
   else if (
     showMode === "listen"
   ) {
 
-    // 保持空白
-    // 完全不顯示字幕
+    // 完全不顯示文字
 
     english.innerText = "";
 
@@ -420,7 +446,7 @@ function render() {
 
 
   console.log(
-    "目前模式：",
+    "目前顯示模式：",
     showMode
   );
 
@@ -460,7 +486,7 @@ function speak() {
   }
 
 
-  // 停止之前的語音
+  // 停止目前播放
 
   speechSynthesis.cancel();
 
@@ -479,7 +505,7 @@ function speak() {
     "en-US";
 
 
-  // 速度
+  // 播放速度
 
   utterance.rate =
     speechRate;
@@ -497,8 +523,7 @@ function speak() {
     1;
 
 
-  // 如果有指定語音
-  // 使用指定語音
+  // 使用選定的英文語音
 
   if (selectedVoice) {
 
@@ -508,7 +533,7 @@ function speak() {
   }
 
 
-  // 播放
+  // 開始播放
 
   speechSynthesis.speak(
     utterance
@@ -518,18 +543,28 @@ function speak() {
 
 
 // ========================================
-// 設定顯示模式
+// 切換顯示模式
+// ========================================
+//
+// 注意：
+// index.html 使用的是
+//
+// changeShow('en')
+// changeShow('zh')
+// changeShow('both')
+//
+// 所以這裡必須使用 changeShow()
 // ========================================
 
-function setMode(mode) {
+function changeShow(mode) {
 
   console.log(
-    "切換模式：",
+    "切換顯示模式：",
     mode
   );
 
 
-  // 停止目前播放
+  // 停止目前語音
 
   if (
     "speechSynthesis" in window
@@ -540,84 +575,15 @@ function setMode(mode) {
   }
 
 
-  // ======================================
-  // 直接設定模式
-  // ======================================
+  // 設定新的模式
 
-  if (
-    mode === "en"
-  ) {
-
-    showMode =
-      "en";
-
-  }
-
-  else if (
-    mode === "zh"
-  ) {
-
-    showMode =
-      "zh";
-
-  }
-
-  else if (
-    mode === "both"
-  ) {
-
-    showMode =
-      "both";
-
-  }
-
-  else if (
-    mode === "listen"
-  ) {
-
-    showMode =
-      "listen";
-
-  }
-
-  else {
-
-    // 不認識的模式
-    // 不做任何事情
-
-    console.warn(
-      "未知模式：",
-      mode
-    );
-
-    return;
-
-  }
+  showMode =
+    mode;
 
 
-  // 更新畫面
+  // 重新顯示
 
   render();
-
-
-  // ======================================
-  // 只有盲聽模式自動播放
-  // ======================================
-
-  if (
-    showMode === "listen"
-  ) {
-
-    setTimeout(
-      function () {
-
-        speak();
-
-      },
-      250
-    );
-
-  }
 
 }
 
@@ -625,19 +591,45 @@ function setMode(mode) {
 // ========================================
 // 盲聽模式
 // ========================================
-//
-// 保留這個函式是為了相容未來使用
-//
-// 目前 index.html 使用的是：
-// setMode('listen')
-//
-// 所以實際會由 setMode 處理
-// ========================================
 
 function blindMode() {
 
-  setMode(
-    "listen"
+  console.log(
+    "進入盲聽模式"
+  );
+
+
+  // 停止目前語音
+
+  if (
+    "speechSynthesis" in window
+  ) {
+
+    speechSynthesis.cancel();
+
+  }
+
+
+  // 設定盲聽
+
+  showMode =
+    "listen";
+
+
+  // 清除畫面
+
+  render();
+
+
+  // 自動播放目前句子
+
+  setTimeout(
+    function () {
+
+      speak();
+
+    },
+    250
   );
 
 }
@@ -729,7 +721,7 @@ function previousSentence() {
     currentIndex - 1;
 
 
-  // 第一筆再往前
+  // 第一筆再按上一句
   // 回到最後一筆
 
   if (
@@ -780,7 +772,7 @@ function setSpeechRate(rate) {
   }
 
 
-  // 最低 0.5
+  // 最低 0.5x
 
   if (
     newRate < 0.5
@@ -792,7 +784,7 @@ function setSpeechRate(rate) {
   }
 
 
-  // 最高 1.0
+  // 最高 1.0x
 
   else if (
     newRate > 1.0
@@ -813,13 +805,13 @@ function setSpeechRate(rate) {
 
 
   console.log(
-    "播放速度：",
+    "目前播放速度：",
     speechRate
   );
 
 
   // 如果正在播放
-  // 重新播放
+  // 重新播放目前句子
 
   if (
     speechSynthesis.speaking
@@ -839,12 +831,12 @@ function setSpeechRate(rate) {
 window.onload =
   function () {
 
-    // 先取得系統語音
+    // 載入語音
 
     loadVoices();
 
 
-    // 再載入資料
+    // 載入 Google Sheet
 
     loadLibrary();
 
