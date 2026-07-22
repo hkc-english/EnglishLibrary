@@ -1,20 +1,33 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
 <title>English Library</title>
 
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet"
+href="style.css">
 
 </head>
+
 <body>
 
 <div class="container">
 
-<h1>📚 English Library</h1>
+<h1>
+📚 English Library
+</h1>
+
 
 <div id="count"></div>
+
+
+<!-- 顯示模式 -->
 
 <div class="toolbar">
 
@@ -36,15 +49,22 @@
 
 </div>
 
+
+<!-- 目前句子 -->
+
 <div id="card">
 
 <div id="english">
 Loading...
 </div>
 
-<div id="chinese"></div>
+<div id="chinese">
+</div>
 
 </div>
+
+
+<!-- 操作按鈕 -->
 
 <div class="controls">
 
@@ -62,10 +82,40 @@ Loading...
 
 </div>
 
+
+<!-- 播放速度 -->
+
+<div class="speed-control">
+
+<div class="speed-title">
+播放速度
 </div>
+
+
+<div class="speed-buttons">
+
+<button onclick="setSpeechRate(0.5)">
+0.5x
+</button>
+
+<button onclick="setSpeechRate(0.7)">
+0.7x
+</button>
+
+<button onclick="setSpeechRate(1.0)">
+1.0x
+</button>
+
+</div>
+
+</div>
+
+
+</div>
+
 
 <script src="app.js"></script>
 
 </body>
-</html>
 
+</html>
