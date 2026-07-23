@@ -1,4 +1,4 @@
-console.log("English Library V1");
+console.log("English Library V1.1");
 
 const API_URL =
   "https://script.google.com/macros/s/AKfycbzIcTcSbfJQH-TlrFmZ7fQ_Hwq99XBhkvK3CAhJC48nLMz5gD6ScBNYT1PZNNSPx_Qw7A/exec";
@@ -15,21 +15,27 @@ let currentIndex = 0;
 let current = null;
 
 
+// ========================================
 // 顯示模式
 // en     = 英文
 // zh     = 中文
 // both   = 英＋中
 // listen = 盲聽
+// ========================================
 
 let showMode = "en";
 
 
+// ========================================
 // 播放速度
+// ========================================
 
 let speechRate = 0.7;
 
 
+// ========================================
 // 系統英文語音
+// ========================================
 
 let selectedVoice = null;
 
@@ -44,7 +50,6 @@ async function loadLibrary() {
 
     const response =
       await fetch(API_URL);
-
 
     if (!response.ok) {
 
@@ -68,8 +73,7 @@ async function loadLibrary() {
     }
 
 
-    library =
-      data;
+    library = data;
 
 
     console.log(
@@ -79,42 +83,33 @@ async function loadLibrary() {
     );
 
 
-    // ====================================
-    // 更新資料筆數
-    // ====================================
-
-    const count =
-      document.getElementById(
-        "count"
-      );
-
-
-    if (count) {
-
-      count.innerText =
-        `${library.length} 筆`;
-
-    }
-
-
-    // ====================================
     // 載入語音
-    // ====================================
 
     loadVoices();
 
 
-    // ====================================
-    // 從第一筆開始
-    // ====================================
+    // 確保目前 index 正確
 
-    currentIndex =
-      0;
+    if (
+      library.length === 0
+    ) {
+
+      currentIndex = 0;
+
+    }
+
+    else if (
+      currentIndex >=
+      library.length
+    ) {
+
+      currentIndex =
+        library.length - 1;
+
+    }
 
 
-    // ====================================
     // 顯示資料
-    // ====================================
 
     render();
 
@@ -174,10 +169,6 @@ function loadVoices() {
   }
 
 
-  // ====================================
-  // 只找英文語音
-  // ====================================
-
   const englishVoices =
     voices.filter(
       function (voice) {
@@ -201,10 +192,6 @@ function loadVoices() {
 
   }
 
-
-  // ====================================
-  // 優先選擇較自然的英文語音
-  // ====================================
 
   const preferredNames = [
 
@@ -273,11 +260,6 @@ function loadVoices() {
   }
 
 
-  // ====================================
-  // 找不到指定語音
-  // 使用第一個英文語音
-  // ====================================
-
   selectedVoice =
     englishVoices[0];
 
@@ -292,8 +274,7 @@ function loadVoices() {
 
 
 // ========================================
-// Safari / iPhone
-// 語音清單載入完成後重新取得
+// Safari / iPhone 語音清單
 // ========================================
 
 if (
@@ -316,23 +297,82 @@ if (
 
 function render() {
 
-  // ====================================
+  // 更新筆數
+
+  const count =
+    document.getElementById(
+      "count"
+    );
+
+
+  if (count) {
+
+    if (
+      library.length === 0
+    ) {
+
+      count.innerText =
+        "目前沒有資料";
+
+    }
+
+    else {
+
+      count.innerText =
+        "第 " +
+        (currentIndex + 1) +
+        " / " +
+        library.length +
+        " 筆";
+
+    }
+
+  }
+
+
   // 沒有資料
-  // ====================================
 
   if (
     !library ||
     library.length === 0
   ) {
 
+    current = null;
+
+
+    const english =
+      document.getElementById(
+        "english"
+      );
+
+    const chinese =
+      document.getElementById(
+        "chinese"
+      );
+
+
+    if (english) {
+
+      english.innerText =
+        "目前沒有英文資料";
+
+    }
+
+
+    if (chinese) {
+
+      chinese.innerText =
+        "";
+
+    }
+
+
     return;
 
   }
 
 
-  // ====================================
   // 確保 index 不超出範圍
-  // ====================================
 
   if (
     currentIndex < 0
@@ -349,23 +389,18 @@ function render() {
     library.length
   ) {
 
-    currentIndex =
-      0;
+    currentIndex = 0;
 
   }
 
 
-  // ====================================
   // 取得目前資料
-  // ====================================
 
   current =
     library[currentIndex];
 
 
-  // ====================================
   // 取得畫面元素
-  // ====================================
 
   const english =
     document.getElementById(
@@ -389,20 +424,14 @@ function render() {
   }
 
 
-  // ====================================
-  // 先全部清空
-  // ====================================
+  // 清空
 
-  english.innerText =
-    "";
+  english.innerText = "";
 
-  chinese.innerText =
-    "";
+  chinese.innerText = "";
 
 
-  // ====================================
   // 取得文字
-  // ====================================
 
   const englishText =
     current["英文"] || "";
@@ -412,9 +441,9 @@ function render() {
     current["中文"] || "";
 
 
-  // ====================================
+  // ======================================
   // 英文模式
-  // ====================================
+  // ======================================
 
   if (
     showMode === "en"
@@ -426,9 +455,9 @@ function render() {
   }
 
 
-  // ====================================
+  // ======================================
   // 中文模式
-  // ====================================
+  // ======================================
 
   else if (
     showMode === "zh"
@@ -440,9 +469,9 @@ function render() {
   }
 
 
-  // ====================================
+  // ======================================
   // 英＋中模式
-  // ====================================
+  // ======================================
 
   else if (
     showMode === "both"
@@ -457,33 +486,27 @@ function render() {
   }
 
 
-  // ====================================
+  // ======================================
   // 盲聽模式
-  // ====================================
+  // ======================================
 
   else if (
     showMode === "listen"
   ) {
 
-    english.innerText =
-      "";
+    english.innerText = "";
 
-    chinese.innerText =
-      "";
+    chinese.innerText = "";
 
   }
 
 
-  // ====================================
-  // 更新模式按鈕
-  // ====================================
+  // 更新模式按鈕高亮
 
   updateModeButtons();
 
 
-  // ====================================
-  // 更新速度按鈕
-  // ====================================
+  // 更新速度按鈕高亮
 
   updateSpeedButtons();
 
@@ -497,7 +520,7 @@ function render() {
 
 
 // ========================================
-// 更新模式按鈕
+// 更新模式按鈕高亮
 // ========================================
 
 function updateModeButtons() {
@@ -507,20 +530,6 @@ function updateModeButtons() {
       ".toolbar button"
     );
 
-
-  if (
-    !buttons ||
-    buttons.length < 4
-  ) {
-
-    return;
-
-  }
-
-
-  // ====================================
-  // 全部移除 active
-  // ====================================
 
   buttons.forEach(
     function (button) {
@@ -533,141 +542,64 @@ function updateModeButtons() {
   );
 
 
-  // ====================================
-  // 根據目前模式設定 active
-  // ====================================
-
   if (
     showMode === "en"
   ) {
 
-    buttons[0].classList.add(
-      "active"
-    );
+    if (buttons[0]) {
+
+      buttons[0].classList.add(
+        "active"
+      );
+
+    }
 
   }
+
 
   else if (
     showMode === "zh"
   ) {
 
-    buttons[1].classList.add(
-      "active"
-    );
+    if (buttons[1]) {
+
+      buttons[1].classList.add(
+        "active"
+      );
+
+    }
 
   }
+
 
   else if (
     showMode === "both"
   ) {
 
-    buttons[2].classList.add(
-      "active"
-    );
+    if (buttons[2]) {
+
+      buttons[2].classList.add(
+        "active"
+      );
+
+    }
 
   }
+
 
   else if (
     showMode === "listen"
   ) {
 
-    buttons[3].classList.add(
-      "active"
-    );
+    if (buttons[3]) {
 
-  }
-
-}
-
-
-// ========================================
-// 更新播放速度按鈕
-// ========================================
-//
-// 你的 index.html 使用：
-//
-// class="speed-button"
-// data-rate="0.5"
-//
-// 所以這裡直接依照 data-rate 判斷
-// ========================================
-
-function updateSpeedButtons() {
-
-  const speedButtons =
-    document.querySelectorAll(
-      ".speed-button"
-    );
-
-
-  if (
-    !speedButtons ||
-    speedButtons.length === 0
-  ) {
-
-    console.warn(
-      "找不到播放速度按鈕"
-    );
-
-    return;
-
-  }
-
-
-  speedButtons.forEach(
-    function (button) {
-
-      const buttonRate =
-        Number(
-          button.dataset.rate
-        );
-
-
-      // ==================================
-      // 先移除兩種可能的高亮 class
-      // ==================================
-
-      button.classList.remove(
+      buttons[3].classList.add(
         "active"
       );
 
-      button.classList.remove(
-        "active-speed"
-      );
-
-
-      // ==================================
-      // 判斷目前速度
-      // ==================================
-
-      if (
-        Math.abs(
-          buttonRate -
-          speechRate
-        ) < 0.001
-      ) {
-
-        // 同時加入兩種 class
-        // 確保目前 style.css 能顯示
-
-        button.classList.add(
-          "active"
-        );
-
-        button.classList.add(
-          "active-speed"
-        );
-
-      }
-
     }
-  );
 
-
-  console.log(
-    "目前播放速度：",
-    speechRate
-  );
+  }
 
 }
 
@@ -705,16 +637,8 @@ function speak() {
   }
 
 
-  // ====================================
-  // 停止之前語音
-  // ====================================
-
   speechSynthesis.cancel();
 
-
-  // ====================================
-  // 建立語音
-  // ====================================
 
   const utterance =
     new SpeechSynthesisUtterance(
@@ -722,41 +646,21 @@ function speak() {
     );
 
 
-  // ====================================
-  // 英文
-  // ====================================
-
   utterance.lang =
     "en-US";
 
-
-  // ====================================
-  // 播放速度
-  // ====================================
 
   utterance.rate =
     speechRate;
 
 
-  // ====================================
-  // 音調
-  // ====================================
-
   utterance.pitch =
     1;
 
 
-  // ====================================
-  // 音量
-  // ====================================
-
   utterance.volume =
     1;
 
-
-  // ====================================
-  // 使用選定語音
-  // ====================================
 
   if (selectedVoice) {
 
@@ -765,10 +669,6 @@ function speak() {
 
   }
 
-
-  // ====================================
-  // 播放
-  // ====================================
 
   speechSynthesis.speak(
     utterance
@@ -789,16 +689,48 @@ function setMode(mode) {
   );
 
 
-  // ====================================
-  // 確認模式是否合法
-  // ====================================
+  if (
+    "speechSynthesis" in window
+  ) {
+
+    speechSynthesis.cancel();
+
+  }
+
 
   if (
-    mode !== "en" &&
-    mode !== "zh" &&
-    mode !== "both" &&
-    mode !== "listen"
+    mode === "en"
   ) {
+
+    showMode = "en";
+
+  }
+
+  else if (
+    mode === "zh"
+  ) {
+
+    showMode = "zh";
+
+  }
+
+  else if (
+    mode === "both"
+  ) {
+
+    showMode = "both";
+
+  }
+
+  else if (
+    mode === "listen"
+  ) {
+
+    showMode = "listen";
+
+  }
+
+  else {
 
     console.warn(
       "未知模式：",
@@ -810,37 +742,10 @@ function setMode(mode) {
   }
 
 
-  // ====================================
-  // 停止目前語音
-  // ====================================
-
-  if (
-    "speechSynthesis" in window
-  ) {
-
-    speechSynthesis.cancel();
-
-  }
-
-
-  // ====================================
-  // 設定模式
-  // ====================================
-
-  showMode =
-    mode;
-
-
-  // ====================================
-  // 立即更新畫面
-  // ====================================
-
   render();
 
 
-  // ====================================
-  // 只有盲聽模式自動播放
-  // ====================================
+  // 盲聽自動播放
 
   if (
     showMode === "listen"
@@ -852,7 +757,7 @@ function setMode(mode) {
         speak();
 
       },
-      300
+      250
     );
 
   }
@@ -864,20 +769,15 @@ function setMode(mode) {
 // changeShow
 // ========================================
 //
-// 你的 index.html 使用：
-//
+// index.html 使用：
 // changeShow('en')
 // changeShow('zh')
 // changeShow('both')
-//
-// 全部統一交給 setMode
 // ========================================
 
 function changeShow(mode) {
 
-  setMode(
-    mode
-  );
+  setMode(mode);
 
 }
 
@@ -911,61 +811,42 @@ function nextSentence() {
   }
 
 
-  // ====================================
-  // 停止目前播放
-  // ====================================
+  speechSynthesis.cancel();
 
-  if (
-    "speechSynthesis" in window
-  ) {
-
-    speechSynthesis.cancel();
-
-  }
-
-
-  // ====================================
-  // 下一筆
-  // ====================================
 
   currentIndex =
     currentIndex + 1;
 
-
-  // ====================================
-  // 最後一筆回到第一筆
-  // ====================================
 
   if (
     currentIndex >=
     library.length
   ) {
 
-    currentIndex =
-      0;
+    currentIndex = 0;
 
   }
 
 
-  // ====================================
-  // 更新畫面
-  // ====================================
-
   render();
 
 
-  // ====================================
-  // 自動播放
-  // ====================================
+  // 盲聽模式自動播放
 
-  setTimeout(
-    function () {
+  if (
+    showMode === "listen"
+  ) {
 
-      speak();
+    setTimeout(
+      function () {
 
-    },
-    300
-  );
+        speak();
+
+      },
+      250
+    );
+
+  }
 
 }
 
@@ -986,30 +867,12 @@ function previousSentence() {
   }
 
 
-  // ====================================
-  // 停止目前播放
-  // ====================================
+  speechSynthesis.cancel();
 
-  if (
-    "speechSynthesis" in window
-  ) {
-
-    speechSynthesis.cancel();
-
-  }
-
-
-  // ====================================
-  // 上一筆
-  // ====================================
 
   currentIndex =
     currentIndex - 1;
 
-
-  // ====================================
-  // 第一筆回到最後一筆
-  // ====================================
 
   if (
     currentIndex < 0
@@ -1021,25 +884,25 @@ function previousSentence() {
   }
 
 
-  // ====================================
-  // 更新畫面
-  // ====================================
-
   render();
 
 
-  // ====================================
-  // 自動播放
-  // ====================================
+  // 盲聽模式自動播放
 
-  setTimeout(
-    function () {
+  if (
+    showMode === "listen"
+  ) {
 
-      speak();
+    setTimeout(
+      function () {
 
-    },
-    300
-  );
+        speak();
+
+      },
+      250
+    );
+
+  }
 
 }
 
@@ -1054,10 +917,6 @@ function setSpeechRate(rate) {
     Number(rate);
 
 
-  // ====================================
-  // 確認數值
-  // ====================================
-
   if (
     isNaN(newRate)
   ) {
@@ -1066,10 +925,6 @@ function setSpeechRate(rate) {
 
   }
 
-
-  // ====================================
-  // 限制最低 0.5
-  // ====================================
 
   if (
     newRate < 0.5
@@ -1080,11 +935,6 @@ function setSpeechRate(rate) {
 
   }
 
-
-  // ====================================
-  // 限制最高 1.0
-  // ====================================
-
   else if (
     newRate > 1.0
   ) {
@@ -1093,11 +943,6 @@ function setSpeechRate(rate) {
       1.0;
 
   }
-
-
-  // ====================================
-  // 正常範圍
-  // ====================================
 
   else {
 
@@ -1108,29 +953,442 @@ function setSpeechRate(rate) {
 
 
   console.log(
-    "播放速度設定為：",
+    "播放速度：",
     speechRate
   );
 
 
-  // ====================================
-  // 立即更新速度高亮
-  // ====================================
-
   updateSpeedButtons();
 
 
-  // ====================================
   // 如果正在播放
-  // 使用新速度重新播放
-  // ====================================
 
   if (
-    "speechSynthesis" in window &&
     speechSynthesis.speaking
   ) {
 
     speak();
+
+  }
+
+}
+
+
+// ========================================
+// 更新速度按鈕高亮
+// ========================================
+
+function updateSpeedButtons() {
+
+  const buttons =
+    document.querySelectorAll(
+      ".speed-button"
+    );
+
+
+  buttons.forEach(
+    function (button) {
+
+      button.classList.remove(
+        "active-speed"
+      );
+
+    }
+  );
+
+
+  buttons.forEach(
+    function (button) {
+
+      const rate =
+        Number(
+          button.dataset.rate
+        );
+
+
+      if (
+        rate === speechRate
+      ) {
+
+        button.classList.add(
+          "active-speed"
+        );
+
+      }
+
+    }
+  );
+
+}
+
+
+// ========================================
+// 顯示新增表單
+// ========================================
+
+function showAddForm() {
+
+  const form =
+    document.getElementById(
+      "addForm"
+    );
+
+
+  const english =
+    document.getElementById(
+      "newEnglish"
+    );
+
+
+  const chinese =
+    document.getElementById(
+      "newChinese"
+    );
+
+
+  const message =
+    document.getElementById(
+      "addMessage"
+    );
+
+
+  if (form) {
+
+    form.style.display =
+      "block";
+
+  }
+
+
+  if (message) {
+
+    message.innerText =
+      "";
+
+  }
+
+
+  if (english) {
+
+    english.value =
+      "";
+
+  }
+
+
+  if (chinese) {
+
+    chinese.value =
+      "";
+
+  }
+
+
+  if (english) {
+
+    english.focus();
+
+  }
+
+}
+
+
+// ========================================
+// 隱藏新增表單
+// ========================================
+
+function hideAddForm() {
+
+  const form =
+    document.getElementById(
+      "addForm"
+    );
+
+
+  if (form) {
+
+    form.style.display =
+      "none";
+
+  }
+
+}
+
+
+// ========================================
+// 新增句子
+// ========================================
+
+async function addSentence() {
+
+  const englishInput =
+    document.getElementById(
+      "newEnglish"
+    );
+
+
+  const chineseInput =
+    document.getElementById(
+      "newChinese"
+    );
+
+
+  const message =
+    document.getElementById(
+      "addMessage"
+    );
+
+
+  const saveButton =
+    document.querySelector(
+      ".form-buttons button:first-child"
+    );
+
+
+  if (
+    !englishInput ||
+    !chineseInput
+  ) {
+
+    return;
+
+  }
+
+
+  const english =
+    englishInput.value.trim();
+
+
+  const chinese =
+    chineseInput.value.trim();
+
+
+  // ======================================
+  // 檢查英文
+  // ======================================
+
+  if (!english) {
+
+    if (message) {
+
+      message.innerText =
+        "請輸入英文句子。";
+
+    }
+
+    englishInput.focus();
+
+    return;
+
+  }
+
+
+  // ======================================
+  // 檢查中文
+  // ======================================
+
+  if (!chinese) {
+
+    if (message) {
+
+      message.innerText =
+        "請輸入中文翻譯。";
+
+    }
+
+    chineseInput.focus();
+
+    return;
+
+  }
+
+
+  // ======================================
+  // 顯示儲存中
+  // ======================================
+
+  if (message) {
+
+    message.innerText =
+      "正在儲存，請稍候...";
+
+  }
+
+
+  if (saveButton) {
+
+    saveButton.disabled =
+      true;
+
+    saveButton.innerText =
+      "儲存中...";
+
+  }
+
+
+  // ======================================
+  // 建立資料
+  // ======================================
+
+  const requestData = {
+
+    action: "add",
+
+    "英文":
+      english,
+
+    "中文":
+      chinese,
+
+    "類型":
+      "",
+
+    "熟悉度":
+      "陌生",
+
+    "備註":
+      "",
+
+    "標籤":
+      "",
+
+    "重點":
+      ""
+
+  };
+
+
+  try {
+
+    // ====================================
+    // 傳送到 Google Apps Script
+    // ====================================
+
+    const response =
+      await fetch(
+        API_URL,
+        {
+
+          method:
+            "POST",
+
+          headers: {
+
+            "Content-Type":
+              "text/plain;charset=utf-8"
+
+          },
+
+          body:
+            JSON.stringify(
+              requestData
+            )
+
+        }
+      );
+
+
+    const result =
+      await response.json();
+
+
+    console.log(
+      "新增結果：",
+      result
+    );
+
+
+    if (
+      !result.success
+    ) {
+
+      throw new Error(
+        result.error ||
+        "新增資料失敗"
+      );
+
+    }
+
+
+    // ====================================
+    // 新增成功
+    // ====================================
+
+    if (message) {
+
+      message.innerText =
+        "✅ 新增成功！";
+
+    }
+
+
+    // 記住新資料應該在最後一筆
+
+    currentIndex =
+      library.length;
+
+
+    // 關閉表單前稍微等待
+
+    setTimeout(
+      async function () {
+
+        hideAddForm();
+
+
+        // 重新載入 Google Sheet
+
+        await loadLibrary();
+
+
+        // 顯示最後新增的資料
+
+        if (
+          library.length > 0
+        ) {
+
+          currentIndex =
+            library.length - 1;
+
+          render();
+
+        }
+
+      },
+      500
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "新增資料失敗：",
+      error
+    );
+
+
+    if (message) {
+
+      message.innerText =
+        "❌ 新增失敗：" +
+        error.message;
+
+    }
+
+  }
+
+
+  finally {
+
+    if (saveButton) {
+
+      saveButton.disabled =
+        false;
+
+      saveButton.innerText =
+        "💾 儲存";
+
+    }
 
   }
 
@@ -1144,35 +1402,17 @@ function setSpeechRate(rate) {
 window.onload =
   function () {
 
-    console.log(
-      "English Library V1 啟動"
-    );
-
-
-    // ==================================
-    // 取得系統語音
-    // ==================================
+    // 載入系統語音
 
     loadVoices();
 
 
-    // ==================================
-    // 更新速度按鈕
-    // ==================================
+    // 初始化速度高亮
 
     updateSpeedButtons();
 
 
-    // ==================================
-    // 更新模式按鈕
-    // ==================================
-
-    updateModeButtons();
-
-
-    // ==================================
     // 載入 Google Sheet
-    // ==================================
 
     loadLibrary();
 
