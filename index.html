@@ -13,27 +13,6 @@ content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet"
 href="style.css">
 
-
-<!-- PWA -->
-
-<link rel="manifest"
-href="manifest.json">
-
-
-<meta name="theme-color"
-content="#333333">
-
-
-<meta name="apple-mobile-web-app-capable"
-content="yes">
-
-<meta name="apple-mobile-web-app-status-bar-style"
-content="default">
-
-<meta name="apple-mobile-web-app-title"
-content="English Library">
-
-
 </head>
 
 
@@ -51,90 +30,7 @@ content="English Library">
      資料筆數
 ======================================== -->
 
-<div id="count"></div>
-
-
-<!-- ========================================
-     新增句子
-======================================== -->
-
-<div class="add-section">
-
-<button
-id="addButton"
-onclick="showAddForm()">
-
-＋ 新增句子
-
-</button>
-
-</div>
-
-
-<!-- ========================================
-     新增資料表單
-======================================== -->
-
-<div
-id="addForm"
-class="add-form"
-style="display: none;">
-
-<div class="form-title">
-
-新增英文句子
-
-</div>
-
-
-<label for="newEnglish">
-
-英文
-
-</label>
-
-<textarea
-id="newEnglish"
-placeholder="請輸入英文句子">
-
-</textarea>
-
-
-<label for="newChinese">
-
-中文
-
-</label>
-
-<textarea
-id="newChinese"
-placeholder="請輸入中文翻譯">
-
-</textarea>
-
-
-<div class="form-buttons">
-
-<button
-onclick="addSentence()">
-
-💾 儲存
-
-</button>
-
-
-<button
-onclick="hideAddForm()">
-
-取消
-
-</button>
-
-</div>
-
-
-<div id="addMessage"></div>
-
+<div id="count">
 </div>
 
 
@@ -144,19 +40,26 @@ onclick="hideAddForm()">
 
 <div class="toolbar">
 
-<button onclick="changeShow('en')">
+<button
+onclick="changeShow('en')">
 英文
 </button>
 
-<button onclick="changeShow('zh')">
+
+<button
+onclick="changeShow('zh')">
 中文
 </button>
 
-<button onclick="changeShow('both')">
+
+<button
+onclick="changeShow('both')">
 英＋中
 </button>
 
-<button onclick="blindMode()">
+
+<button
+onclick="blindMode()">
 盲聽
 </button>
 
@@ -173,6 +76,7 @@ onclick="hideAddForm()">
 Loading...
 </div>
 
+
 <div id="chinese">
 </div>
 
@@ -180,23 +84,69 @@ Loading...
 
 
 <!-- ========================================
-     上一句 / 播放 / 下一句
+     單句播放控制
 ======================================== -->
 
 <div class="controls">
 
-<button onclick="previousSentence()">
+
+<button
+onclick="previousSentence()">
 ⬅ 上一句
 </button>
 
-<button onclick="speak()">
+
+<button
+onclick="speak()">
 🔊 播放
 </button>
 
-<button onclick="nextSentence()">
+
+<button
+onclick="nextSentence()">
 下一句 ➡
 </button>
 
+
+</div>
+
+
+<!-- ========================================
+     連續／隨機播放控制
+======================================== -->
+
+<div class="playback-controls">
+
+
+<button
+id="continuousButton"
+onclick="startContinuousPlay()">
+▶️ 連續播放
+</button>
+
+
+<button
+id="stopButton"
+onclick="stopContinuousPlay()">
+⏹️ 停止
+</button>
+
+
+<button
+id="randomButton"
+onclick="startRandomPlay()">
+🔀 隨機播放
+</button>
+
+
+</div>
+
+
+<!-- ========================================
+     播放狀態
+======================================== -->
+
+<div id="playbackStatus">
 </div>
 
 
@@ -205,6 +155,7 @@ Loading...
 ======================================== -->
 
 <div class="speed-control">
+
 
 <div class="speed-title">
 播放速度
@@ -215,35 +166,29 @@ Loading...
 
 
 <button
-id="speed05"
 class="speed-button"
+id="speed05"
 data-rate="0.5"
 onclick="setSpeechRate(0.5)">
-
 0.5x
-
 </button>
 
 
 <button
+class="speed-button"
 id="speed07"
-class="speed-button active-speed"
 data-rate="0.7"
 onclick="setSpeechRate(0.7)">
-
 0.7x
-
 </button>
 
 
 <button
-id="speed10"
 class="speed-button"
+id="speed10"
 data-rate="1.0"
 onclick="setSpeechRate(1.0)">
-
 1.0x
-
 </button>
 
 
@@ -256,53 +201,6 @@ onclick="setSpeechRate(1.0)">
 
 
 <script src="app.js"></script>
-
-
-<!-- ========================================
-     PWA Service Worker
-======================================== -->
-
-<script>
-
-if (
-  "serviceWorker" in navigator
-) {
-
-  window.addEventListener(
-    "load",
-    function () {
-
-      navigator.serviceWorker
-        .register("./sw.js")
-
-        .then(
-          function (registration) {
-
-            console.log(
-              "EnglishLibrary PWA 啟用成功",
-              registration.scope
-            );
-
-          }
-        )
-
-        .catch(
-          function (error) {
-
-            console.error(
-              "PWA 啟用失敗",
-              error
-            );
-
-          }
-        );
-
-    }
-  );
-
-}
-
-</script>
 
 
 </body>
