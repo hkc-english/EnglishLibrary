@@ -1,0 +1,10 @@
+{
+  "name": "English Library",
+  "short_name": "English Library",
+  "description": "Personal English learning library",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f5f7fa",
+  "theme_color": "#333333",
+  "orientation": "portrait"
+}
