@@ -24,8 +24,6 @@ href="manifest.json">
 content="#333333">
 
 
-<!-- iPhone / iPad -->
-
 <meta name="apple-mobile-web-app-capable"
 content="yes">
 
@@ -54,6 +52,90 @@ content="English Library">
 ======================================== -->
 
 <div id="count"></div>
+
+
+<!-- ========================================
+     新增句子
+======================================== -->
+
+<div class="add-section">
+
+<button
+id="addButton"
+onclick="showAddForm()">
+
+＋ 新增句子
+
+</button>
+
+</div>
+
+
+<!-- ========================================
+     新增資料表單
+======================================== -->
+
+<div
+id="addForm"
+class="add-form"
+style="display: none;">
+
+<div class="form-title">
+
+新增英文句子
+
+</div>
+
+
+<label for="newEnglish">
+
+英文
+
+</label>
+
+<textarea
+id="newEnglish"
+placeholder="請輸入英文句子">
+
+</textarea>
+
+
+<label for="newChinese">
+
+中文
+
+</label>
+
+<textarea
+id="newChinese"
+placeholder="請輸入中文翻譯">
+
+</textarea>
+
+
+<div class="form-buttons">
+
+<button
+onclick="addSentence()">
+
+💾 儲存
+
+</button>
+
+
+<button
+onclick="hideAddForm()">
+
+取消
+
+</button>
+
+</div>
+
+
+<div id="addMessage"></div>
+
+</div>
 
 
 <!-- ========================================
@@ -137,7 +219,9 @@ id="speed05"
 class="speed-button"
 data-rate="0.5"
 onclick="setSpeechRate(0.5)">
+
 0.5x
+
 </button>
 
 
@@ -146,7 +230,9 @@ id="speed07"
 class="speed-button active-speed"
 data-rate="0.7"
 onclick="setSpeechRate(0.7)">
+
 0.7x
+
 </button>
 
 
@@ -155,7 +241,9 @@ id="speed10"
 class="speed-button"
 data-rate="1.0"
 onclick="setSpeechRate(1.0)">
+
 1.0x
+
 </button>
 
 
@@ -186,6 +274,7 @@ if (
 
       navigator.serviceWorker
         .register("./sw.js")
+
         .then(
           function (registration) {
 
@@ -196,6 +285,7 @@ if (
 
           }
         )
+
         .catch(
           function (error) {
 
