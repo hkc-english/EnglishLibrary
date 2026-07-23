@@ -501,12 +501,12 @@ function render() {
   }
 
 
-  // 更新模式按鈕高亮
+  // 更新模式按鈕
 
   updateModeButtons();
 
 
-  // 更新速度按鈕高亮
+  // 更新速度按鈕
 
   updateSpeedButtons();
 
@@ -689,6 +689,8 @@ function setMode(mode) {
   );
 
 
+  // 停止目前播放
+
   if (
     "speechSynthesis" in window
   ) {
@@ -745,7 +747,7 @@ function setMode(mode) {
   render();
 
 
-  // 盲聽自動播放
+  // 盲聽模式自動播放
 
   if (
     showMode === "listen"
@@ -767,12 +769,6 @@ function setMode(mode) {
 
 // ========================================
 // changeShow
-// ========================================
-//
-// index.html 使用：
-// changeShow('en')
-// changeShow('zh')
-// changeShow('both')
 // ========================================
 
 function changeShow(mode) {
@@ -811,12 +807,24 @@ function nextSentence() {
   }
 
 
-  speechSynthesis.cancel();
+  // 停止目前播放
 
+  if (
+    "speechSynthesis" in window
+  ) {
+
+    speechSynthesis.cancel();
+
+  }
+
+
+  // 下一筆
 
   currentIndex =
     currentIndex + 1;
 
+
+  // 到最後回第一筆
 
   if (
     currentIndex >=
@@ -828,25 +836,21 @@ function nextSentence() {
   }
 
 
+  // 更新畫面
+
   render();
 
 
-  // 盲聽模式自動播放
+  // 自動播放
 
-  if (
-    showMode === "listen"
-  ) {
+  setTimeout(
+    function () {
 
-    setTimeout(
-      function () {
+      speak();
 
-        speak();
-
-      },
-      250
-    );
-
-  }
+    },
+    250
+  );
 
 }
 
@@ -867,12 +871,24 @@ function previousSentence() {
   }
 
 
-  speechSynthesis.cancel();
+  // 停止目前播放
 
+  if (
+    "speechSynthesis" in window
+  ) {
+
+    speechSynthesis.cancel();
+
+  }
+
+
+  // 上一筆
 
   currentIndex =
     currentIndex - 1;
 
+
+  // 第一筆往前回最後一筆
 
   if (
     currentIndex < 0
@@ -884,25 +900,21 @@ function previousSentence() {
   }
 
 
+  // 更新畫面
+
   render();
 
 
-  // 盲聽模式自動播放
+  // 自動播放
 
-  if (
-    showMode === "listen"
-  ) {
+  setTimeout(
+    function () {
 
-    setTimeout(
-      function () {
+      speak();
 
-        speak();
-
-      },
-      250
-    );
-
-  }
+    },
+    250
+  );
 
 }
 
@@ -926,6 +938,8 @@ function setSpeechRate(rate) {
   }
 
 
+  // 最低 0.5
+
   if (
     newRate < 0.5
   ) {
@@ -935,6 +949,9 @@ function setSpeechRate(rate) {
 
   }
 
+
+  // 最高 1.0
+
   else if (
     newRate > 1.0
   ) {
@@ -943,6 +960,7 @@ function setSpeechRate(rate) {
       1.0;
 
   }
+
 
   else {
 
@@ -957,6 +975,8 @@ function setSpeechRate(rate) {
     speechRate
   );
 
+
+  // 更新按鈕高亮
 
   updateSpeedButtons();
 
@@ -1322,13 +1342,7 @@ async function addSentence() {
     }
 
 
-    // 記住新資料應該在最後一筆
-
-    currentIndex =
-      library.length;
-
-
-    // 關閉表單前稍微等待
+    // 等待 Google Sheet 更新
 
     setTimeout(
       async function () {
@@ -1336,7 +1350,7 @@ async function addSentence() {
         hideAddForm();
 
 
-        // 重新載入 Google Sheet
+        // 重新載入資料
 
         await loadLibrary();
 
@@ -1407,7 +1421,7 @@ window.onload =
     loadVoices();
 
 
-    // 初始化速度高亮
+    // 初始化播放速度高亮
 
     updateSpeedButtons();
 
