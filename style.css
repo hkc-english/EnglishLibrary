@@ -1,11 +1,11 @@
 /* ========================================
    English Library V1
-   Main Style
+   手機版優化
 ======================================== */
 
 
 /* ========================================
-   基本設定
+   全域設定
 ======================================== */
 
 * {
@@ -14,25 +14,19 @@
 
 
 body {
-
   margin: 0;
-
   padding: 20px;
-
-  min-height: 100vh;
 
   font-family:
     -apple-system,
     BlinkMacSystemFont,
     "Segoe UI",
-    "Noto Sans TC",
-    "Microsoft JhengHei",
+    Arial,
     sans-serif;
 
-  background: #f4f6f8;
+  background: #f5f7fa;
 
   color: #222;
-
 }
 
 
@@ -44,7 +38,7 @@ body {
 
   width: 100%;
 
-  max-width: 720px;
+  max-width: 700px;
 
   margin: 0 auto;
 
@@ -52,10 +46,10 @@ body {
 
   background: #ffffff;
 
-  border-radius: 16px;
+  border-radius: 18px;
 
   box-shadow:
-    0 4px 18px
+    0 4px 20px
     rgba(0, 0, 0, 0.08);
 
 }
@@ -67,19 +61,19 @@ body {
 
 h1 {
 
-  margin: 0 0 10px 0;
+  margin-top: 0;
+
+  margin-bottom: 12px;
 
   text-align: center;
 
   font-size: 28px;
 
-  font-weight: 700;
-
 }
 
 
 /* ========================================
-   資料筆數
+   第幾筆 / 總筆數
 ======================================== */
 
 #count {
@@ -88,76 +82,11 @@ h1 {
 
   text-align: center;
 
-  color: #777;
-
-  font-size: 14px;
-
-}
-
-
-/* ========================================
-   顯示模式按鈕區
-======================================== */
-
-.toolbar {
-
-  display: flex;
-
-  flex-wrap: wrap;
-
-  justify-content: center;
-
-  gap: 10px;
-
-  margin-bottom: 20px;
-
-}
-
-
-/* ========================================
-   一般按鈕
-======================================== */
-
-button {
-
-  border: none;
-
-  border-radius: 8px;
-
-  padding: 10px 16px;
-
   font-size: 15px;
 
-  font-family: inherit;
+  color: #666;
 
-  background: #eeeeee;
-
-  color: #222;
-
-  cursor: pointer;
-
-  transition:
-    transform 0.15s ease,
-    background 0.15s ease,
-    box-shadow 0.15s ease;
-
-}
-
-
-/* 滑鼠移上去 */
-
-button:hover {
-
-  background: #dddddd;
-
-}
-
-
-/* 按下按鈕 */
-
-button:active {
-
-  transform: scale(0.96);
+  font-weight: 600;
 
 }
 
@@ -166,9 +95,63 @@ button:active {
    顯示模式按鈕
 ======================================== */
 
+.toolbar {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, 1fr);
+
+  gap: 10px;
+
+  margin-bottom: 20px;
+
+}
+
+
 .toolbar button {
 
-  min-width: 80px;
+  min-height: 48px;
+
+  padding: 10px 8px;
+
+  border: none;
+
+  border-radius: 10px;
+
+  background: #eeeeee;
+
+  color: #333;
+
+  font-size: 16px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.15s,
+    background 0.15s;
+
+}
+
+
+.toolbar button:active {
+
+  transform: scale(0.96);
+
+}
+
+
+/* ========================================
+   目前選中的顯示模式
+======================================== */
+
+.toolbar button.active {
+
+  background: #333;
+
+  color: #ffffff;
 
 }
 
@@ -189,15 +172,13 @@ button:active {
 
   align-items: center;
 
-  padding: 30px 24px;
+  padding: 30px 20px;
 
   margin-bottom: 20px;
 
-  border-radius: 14px;
+  border-radius: 16px;
 
-  background: #fafafa;
-
-  border: 1px solid #e5e5e5;
+  background: #f8f9fb;
 
   text-align: center;
 
@@ -212,13 +193,11 @@ button:active {
 
   width: 100%;
 
-  font-size: 25px;
+  font-size: 26px;
 
-  line-height: 1.7;
+  line-height: 1.6;
 
   font-weight: 600;
-
-  color: #222;
 
   word-break: break-word;
 
@@ -235,9 +214,9 @@ button:active {
 
   margin-top: 18px;
 
-  font-size: 20px;
+  font-size: 21px;
 
-  line-height: 1.7;
+  line-height: 1.6;
 
   color: #555;
 
@@ -247,16 +226,15 @@ button:active {
 
 
 /* ========================================
-   操作按鈕區
+   上一句 / 播放 / 下一句
 ======================================== */
 
 .controls {
 
-  display: flex;
+  display: grid;
 
-  justify-content: center;
-
-  align-items: center;
+  grid-template-columns:
+    1fr 1fr 1fr;
 
   gap: 10px;
 
@@ -265,59 +243,51 @@ button:active {
 }
 
 
-/* ========================================
-   操作按鈕
-======================================== */
-
 .controls button {
 
-  flex: 1;
+  min-height: 52px;
 
-  min-height: 48px;
+  padding: 10px 8px;
 
-  font-size: 15px;
+  border: none;
 
-}
-
-
-/* 播放按鈕 */
-
-.controls button:nth-child(2) {
+  border-radius: 12px;
 
   background: #333;
 
   color: #ffffff;
 
+  font-size: 16px;
+
   font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.15s;
 
 }
 
 
-/* 播放按鈕滑鼠移入 */
+.controls button:active {
 
-.controls button:nth-child(2):hover {
-
-  background: #555;
+  transform: scale(0.96);
 
 }
 
 
 /* ========================================
-   播放速度區
+   播放速度區域
 ======================================== */
 
 .speed-control {
 
-  text-align: center;
+  padding-top: 5px;
 
-  padding-top: 8px;
+  text-align: center;
 
 }
 
-
-/* ========================================
-   播放速度標題
-======================================== */
 
 .speed-title {
 
@@ -325,16 +295,12 @@ button:active {
 
   font-size: 15px;
 
-  color: #666;
-
   font-weight: 600;
+
+  color: #666;
 
 }
 
-
-/* ========================================
-   播放速度按鈕
-======================================== */
 
 .speed-buttons {
 
@@ -342,86 +308,63 @@ button:active {
 
   justify-content: center;
 
-  align-items: center;
-
   gap: 10px;
 
 }
 
 
-/* ========================================
-   速度按鈕基本樣式
-======================================== */
+.speed-button {
 
-.speed-buttons button {
+  min-width: 75px;
 
-  min-width: 70px;
+  min-height: 44px;
 
-  padding: 9px 15px;
+  padding: 8px 14px;
 
-  border:
-    1px solid #cccccc;
+  border: 2px solid #dddddd;
 
-  border-radius: 8px;
+  border-radius: 10px;
 
-  background: #f5f5f5;
+  background: #ffffff;
 
-  color: #333;
+  color: #555;
 
   font-size: 15px;
+
+  font-weight: 600;
 
   cursor: pointer;
 
   transition:
-    transform 0.15s ease,
-    background 0.15s ease,
-    color 0.15s ease,
-    box-shadow 0.15s ease;
+    transform 0.15s,
+    background 0.15s,
+    border 0.15s;
+
+}
+
+
+.speed-button:active {
+
+  transform: scale(0.95);
 
 }
 
 
 /* ========================================
-   速度按鈕滑鼠移入
+   目前播放速度
+   兼容 active / active-speed
 ======================================== */
 
-.speed-buttons button:hover {
+.speed-button.active,
+.speed-button.active-speed {
 
-  background: #e5e5e5;
+  background: #333;
 
-}
-
-
-/* ========================================
-   ★ 目前選中的播放速度
-======================================== */
-
-.speed-buttons button.active-speed {
-
-  background: #333333;
+  border-color: #333;
 
   color: #ffffff;
 
-  border-color: #333333;
-
-  font-weight: 700;
-
-  transform: scale(1.08);
-
-  box-shadow:
-    0 3px 8px
-    rgba(0, 0, 0, 0.2);
-
-}
-
-
-/* ========================================
-   目前速度按鈕按下
-======================================== */
-
-.speed-buttons button.active-speed:active {
-
-  transform: scale(1.02);
+  transform: scale(1.05);
 
 }
 
@@ -430,10 +373,7 @@ button:active {
    手機版
 ======================================== */
 
-@media (
-  max-width: 600px
-) {
-
+@media (max-width: 600px) {
 
   body {
 
@@ -444,9 +384,9 @@ button:active {
 
   .container {
 
-    padding: 18px;
+    padding: 16px;
 
-    border-radius: 12px;
+    border-radius: 14px;
 
   }
 
@@ -458,64 +398,50 @@ button:active {
   }
 
 
-  /* 顯示模式 */
-
   .toolbar {
 
-    gap: 8px;
+    gap: 7px;
 
   }
 
 
   .toolbar button {
 
-    flex: 1;
+    min-height: 46px;
 
-    min-width: 0;
-
-    padding:
-      10px 8px;
+    padding: 8px 4px;
 
     font-size: 14px;
 
   }
 
 
-  /* 句子卡片 */
-
   #card {
 
-    min-height: 220px;
+    min-height: 240px;
 
-    padding:
-      25px 15px;
+    padding: 25px 15px;
 
   }
 
-
-  /* 英文 */
 
   #english {
 
-    font-size: 22px;
+    font-size: 23px;
 
-    line-height: 1.6;
+    line-height: 1.55;
 
   }
 
-
-  /* 中文 */
 
   #chinese {
 
-    font-size: 18px;
+    font-size: 19px;
 
-    line-height: 1.6;
+    line-height: 1.55;
 
   }
 
-
-  /* 操作按鈕 */
 
   .controls {
 
@@ -526,15 +452,14 @@ button:active {
 
   .controls button {
 
-    padding:
-      10px 5px;
+    min-height: 54px;
+
+    padding: 8px 4px;
 
     font-size: 14px;
 
   }
 
-
-  /* 播放速度 */
 
   .speed-buttons {
 
@@ -543,16 +468,11 @@ button:active {
   }
 
 
-  .speed-buttons button {
+  .speed-button {
 
-    flex: 1;
+    min-width: 70px;
 
-    min-width: 0;
-
-    padding:
-      10px 8px;
-
-    font-size: 14px;
+    min-height: 46px;
 
   }
 
@@ -560,38 +480,35 @@ button:active {
 
 
 /* ========================================
-   更小手機
+   小手機
 ======================================== */
 
-@media (
-  max-width: 380px
-) {
-
+@media (max-width: 380px) {
 
   .container {
 
-    padding: 14px;
+    padding: 12px;
 
   }
 
 
-  h1 {
+  .toolbar button {
 
-    font-size: 22px;
+    font-size: 13px;
 
   }
 
 
   #english {
 
-    font-size: 20px;
+    font-size: 21px;
 
   }
 
 
   #chinese {
 
-    font-size: 17px;
+    font-size: 18px;
 
   }
 
@@ -603,13 +520,12 @@ button:active {
   }
 
 
-  .speed-buttons button {
+  .speed-button {
 
-    font-size: 13px;
+    min-width: 64px;
+
+    padding: 7px 8px;
 
   }
 
 }
-
- 
-   
