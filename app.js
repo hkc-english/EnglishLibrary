@@ -25,10 +25,12 @@ let showMode = "en";
 
 
 // 播放速度
+
 let speechRate = 0.7;
 
 
 // 系統英文語音
+
 let selectedVoice = null;
 
 
@@ -38,86 +40,20 @@ let selectedVoice = null;
 
 async function loadLibrary() {
 
-  console.log("開始載入 English Library...");
-
-  const english =
-    document.getElementById("english");
-
-  if (english) {
-
-    english.innerText =
-      "資料載入中...";
-
-  }
-
-
   try {
 
-    const response =
-      await fetch(
-        API_URL + "?t=" + Date.now(),
-        {
-          method: "GET",
-          cache: "no-store"
-        }
-      );
-
-
-    console.log(
-      "API HTTP 狀態：",
-      response.status
-    );
-
+    const response = await fetch(API_URL);
 
     if (!response.ok) {
 
       throw new Error(
-        "Google Sheet API 連線失敗：" +
-        response.status
+        "Google Sheet API 連線失敗"
       );
 
     }
 
-
-    const text =
-      await response.text();
-
-
-    console.log(
-      "API 回傳資料長度：",
-      text.length
-    );
-
-
-    if (!text) {
-
-      throw new Error(
-        "API 沒有回傳資料"
-      );
-
-    }
-
-
-    let data;
-
-
-    try {
-
-      data =
-        JSON.parse(text);
-
-    } catch (jsonError) {
-
-      console.error(
-        "JSON 解析失敗：",
-        text
-      );
-
-      throw new Error(
-        "Google Sheet API 回傳格式錯誤"
-      );
-
-    }
+    const data =
+      await response.json();
 
 
     if (!Array.isArray(data)) {
@@ -129,21 +65,7 @@ async function loadLibrary() {
     }
 
 
-    if (data.length === 0) {
-
-      throw new Error(
-        "Google Sheet 目前沒有資料"
-      );
-
-    }
-
-
-    // ====================================
-    // 成功取得資料
-    // ====================================
-
-    library =
-      data;
+    library = data;
 
 
     console.log(
@@ -153,41 +75,30 @@ async function loadLibrary() {
     );
 
 
-    // ====================================
-    // 更新資料筆數
-    // ====================================
+    // 更新筆數
 
     const count =
-      document.getElementById(
-        "count"
-      );
-
+      document.getElementById("count");
 
     if (count) {
 
       count.innerText =
-        library.length + " 筆";
+        `${library.length} 筆`;
 
     }
 
 
-    // ====================================
     // 載入語音
-    // ====================================
 
     loadVoices();
 
 
-    // ====================================
     // 從第一筆開始
-    // ====================================
 
     currentIndex = 0;
 
 
-    // ====================================
-    // 顯示第一筆
-    // ====================================
+    // 顯示資料
 
     render();
 
@@ -200,24 +111,14 @@ async function loadLibrary() {
     );
 
 
+    const english =
+      document.getElementById("english");
+
+
     if (english) {
 
       english.innerText =
-        "資料載入失敗";
-
-    }
-
-
-    const chinese =
-      document.getElementById(
-        "chinese"
-      );
-
-
-    if (chinese) {
-
-      chinese.innerText =
-        "請重新整理頁面";
+        "資料載入失敗，請重新整理頁面。";
 
     }
 
@@ -236,10 +137,6 @@ function loadVoices() {
     !("speechSynthesis" in window)
   ) {
 
-    console.warn(
-      "此裝置不支援語音播放"
-    );
-
     return;
 
   }
@@ -254,14 +151,12 @@ function loadVoices() {
     voices.length === 0
   ) {
 
-    console.log(
-      "語音清單尚未準備完成"
-    );
-
     return;
 
   }
 
+
+  // 只找英文語音
 
   const englishVoices =
     voices.filter(
@@ -282,18 +177,12 @@ function loadVoices() {
     englishVoices.length === 0
   ) {
 
-    console.warn(
-      "找不到英文語音"
-    );
-
     return;
 
   }
 
 
-  // ====================================
   // 優先選擇較自然的英文語音
-  // ====================================
 
   const preferredNames = [
 
@@ -362,10 +251,8 @@ function loadVoices() {
   }
 
 
-  // ====================================
   // 找不到指定語音
   // 使用第一個英文語音
-  // ====================================
 
   selectedVoice =
     englishVoices[0];
@@ -380,9 +267,8 @@ function loadVoices() {
 }
 
 
-// ========================================
-// Safari / iPhone 語音清單更新
-// ========================================
+// Safari / iPhone
+// 語音清單載入完成後重新取得
 
 if (
   "speechSynthesis" in window
@@ -390,10 +276,6 @@ if (
 
   speechSynthesis.onvoiceschanged =
     function () {
-
-      console.log(
-        "語音清單已更新"
-      );
 
       loadVoices();
 
@@ -408,6 +290,8 @@ if (
 
 function render() {
 
+  // 沒有資料
+
   if (
     !library ||
     library.length === 0
@@ -418,9 +302,7 @@ function render() {
   }
 
 
-  // ====================================
-  // 保護 currentIndex
-  // ====================================
+  // 確保 index 不超出範圍
 
   if (
     currentIndex < 0
@@ -442,13 +324,13 @@ function render() {
   }
 
 
-  // ====================================
   // 取得目前資料
-  // ====================================
 
   current =
     library[currentIndex];
 
+
+  // 取得畫面元素
 
   const english =
     document.getElementById(
@@ -467,27 +349,19 @@ function render() {
     !chinese
   ) {
 
-    console.error(
-      "找不到 english 或 chinese 元素"
-    );
-
     return;
 
   }
 
 
-  // ====================================
-  // 先清空
-  // ====================================
+  // 每次先清空
 
   english.innerText = "";
 
   chinese.innerText = "";
 
 
-  // ====================================
-  // 取得英文與中文
-  // ====================================
+  // 取得文字
 
   const englishText =
     current["英文"] || "";
@@ -497,9 +371,9 @@ function render() {
     current["中文"] || "";
 
 
-  // ====================================
+  // ======================================
   // 英文模式
-  // ====================================
+  // ======================================
 
   if (
     showMode === "en"
@@ -511,9 +385,9 @@ function render() {
   }
 
 
-  // ====================================
+  // ======================================
   // 中文模式
-  // ====================================
+  // ======================================
 
   else if (
     showMode === "zh"
@@ -525,9 +399,9 @@ function render() {
   }
 
 
-  // ====================================
+  // ======================================
   // 英＋中模式
-  // ====================================
+  // ======================================
 
   else if (
     showMode === "both"
@@ -542,9 +416,9 @@ function render() {
   }
 
 
-  // ====================================
+  // ======================================
   // 盲聽模式
-  // ====================================
+  // ======================================
 
   else if (
     showMode === "listen"
@@ -557,17 +431,169 @@ function render() {
   }
 
 
-  console.log(
-    "目前資料：",
-    currentIndex + 1,
-    "/",
-    library.length
-  );
+  // 更新模式按鈕狀態
+
+  updateModeButtons();
+
+
+  // 更新播放速度按鈕狀態
+
+  updateSpeedButtons();
 
 
   console.log(
     "目前模式：",
     showMode
+  );
+
+}
+
+
+// ========================================
+// 更新模式按鈕
+// ========================================
+//
+// 這裡直接找 toolbar 裡面的按鈕
+// 不依賴 setMode
+//
+// 避免盲聽後切不回去
+// ========================================
+
+function updateModeButtons() {
+
+  const buttons =
+    document.querySelectorAll(
+      ".toolbar button"
+    );
+
+
+  if (
+    !buttons ||
+    buttons.length < 4
+  ) {
+
+    return;
+
+  }
+
+
+  // 先全部取消 active
+
+  buttons.forEach(
+    function (button) {
+
+      button.classList.remove(
+        "active"
+      );
+
+    }
+  );
+
+
+  // 根據目前模式高亮
+
+  if (
+    showMode === "en"
+  ) {
+
+    buttons[0].classList.add(
+      "active"
+    );
+
+  }
+
+  else if (
+    showMode === "zh"
+  ) {
+
+    buttons[1].classList.add(
+      "active"
+    );
+
+  }
+
+  else if (
+    showMode === "both"
+  ) {
+
+    buttons[2].classList.add(
+      "active"
+    );
+
+  }
+
+  else if (
+    showMode === "listen"
+  ) {
+
+    buttons[3].classList.add(
+      "active"
+    );
+
+  }
+
+}
+
+
+// ========================================
+// 更新播放速度按鈕
+// ========================================
+
+function updateSpeedButtons() {
+
+  // 找出所有速度按鈕
+
+  const speedButtons =
+    document.querySelectorAll(
+      ".speed-button"
+    );
+
+
+  if (
+    !speedButtons ||
+    speedButtons.length === 0
+  ) {
+
+    return;
+
+  }
+
+
+  // 先全部取消 active
+
+  speedButtons.forEach(
+    function (button) {
+
+      button.classList.remove(
+        "active"
+      );
+
+    }
+  );
+
+
+  // 找到目前速度
+
+  speedButtons.forEach(
+    function (button) {
+
+      const buttonRate =
+        Number(
+          button.dataset.rate
+        );
+
+
+      if (
+        buttonRate === speechRate
+      ) {
+
+        button.classList.add(
+          "active"
+        );
+
+      }
+
+    }
   );
 
 }
@@ -601,25 +627,17 @@ function speak() {
     !("speechSynthesis" in window)
   ) {
 
-    alert(
-      "此裝置不支援語音播放"
-    );
-
     return;
 
   }
 
 
-  // ====================================
-  // 停止上一段語音
-  // ====================================
+  // 停止之前語音
 
   speechSynthesis.cancel();
 
 
-  // ====================================
   // 建立語音
-  // ====================================
 
   const utterance =
     new SpeechSynthesisUtterance(
@@ -627,25 +645,31 @@ function speak() {
     );
 
 
+  // 英文
+
   utterance.lang =
     "en-US";
 
+
+  // 播放速度
 
   utterance.rate =
     speechRate;
 
 
+  // 音調
+
   utterance.pitch =
     1;
 
+
+  // 音量
 
   utterance.volume =
     1;
 
 
-  // ====================================
-  // 使用指定英文語音
-  // ====================================
+  // 使用選定語音
 
   if (selectedVoice) {
 
@@ -655,21 +679,7 @@ function speak() {
   }
 
 
-  console.log(
-    "播放：",
-    text
-  );
-
-
-  console.log(
-    "播放速度：",
-    speechRate
-  );
-
-
-  // ====================================
   // 播放
-  // ====================================
 
   speechSynthesis.speak(
     utterance
@@ -681,6 +691,13 @@ function speak() {
 // ========================================
 // 設定顯示模式
 // ========================================
+//
+// 重要：
+// 英文 / 中文 / 英＋中 / 盲聽
+// 全部統一從這裡切換
+//
+// 不再使用不同函式處理
+// ========================================
 
 function setMode(mode) {
 
@@ -690,36 +707,24 @@ function setMode(mode) {
   );
 
 
-  // ====================================
-  // 停止播放
-  // ====================================
+  // 確認模式是否合法
+
+  const validModes = [
+
+    "en",
+
+    "zh",
+
+    "both",
+
+    "listen"
+
+  ];
+
 
   if (
-    "speechSynthesis" in window
+    !validModes.includes(mode)
   ) {
-
-    speechSynthesis.cancel();
-
-  }
-
-
-  // ====================================
-  // 設定模式
-  // ====================================
-
-  if (
-    mode === "en" ||
-    mode === "zh" ||
-    mode === "both" ||
-    mode === "listen"
-  ) {
-
-    showMode =
-      mode;
-
-  }
-
-  else {
 
     console.warn(
       "未知模式：",
@@ -731,16 +736,29 @@ function setMode(mode) {
   }
 
 
-  // ====================================
-  // 更新畫面
-  // ====================================
+  // 停止目前播放
+
+  if (
+    "speechSynthesis" in window
+  ) {
+
+    speechSynthesis.cancel();
+
+  }
+
+
+  // 設定目前模式
+
+  showMode =
+    mode;
+
+
+  // 立即重新渲染
 
   render();
 
 
-  // ====================================
-  // 盲聽自動播放
-  // ====================================
+  // 盲聽模式自動播放
 
   if (
     showMode === "listen"
@@ -756,6 +774,24 @@ function setMode(mode) {
     );
 
   }
+
+}
+
+
+// ========================================
+// 保留 changeShow
+// ========================================
+//
+// index.html 如果使用
+// changeShow('en')
+// changeShow('zh')
+// changeShow('both')
+// 都可以正常工作
+// ========================================
+
+function changeShow(mode) {
+
+  setMode(mode);
 
 }
 
@@ -789,7 +825,7 @@ function nextSentence() {
   }
 
 
-  // 停止目前播放
+  // 停止播放
 
   if (
     "speechSynthesis" in window
@@ -806,8 +842,7 @@ function nextSentence() {
     currentIndex + 1;
 
 
-  // 到最後一筆
-  // 回到第一筆
+  // 最後一筆 → 第一筆
 
   if (
     currentIndex >=
@@ -824,9 +859,7 @@ function nextSentence() {
   render();
 
 
-  // ====================================
-  // 自動播放
-  // ====================================
+  // 下一句自動播放
 
   setTimeout(
     function () {
@@ -856,7 +889,7 @@ function previousSentence() {
   }
 
 
-  // 停止目前播放
+  // 停止播放
 
   if (
     "speechSynthesis" in window
@@ -873,8 +906,7 @@ function previousSentence() {
     currentIndex - 1;
 
 
-  // 第一筆再往前
-  // 回到最後一筆
+  // 第一筆 → 最後一筆
 
   if (
     currentIndex < 0
@@ -891,9 +923,7 @@ function previousSentence() {
   render();
 
 
-  // ====================================
-  // 自動播放
-  // ====================================
+  // 上一句自動播放
 
   setTimeout(
     function () {
@@ -926,9 +956,7 @@ function setSpeechRate(rate) {
   }
 
 
-  // ====================================
-  // 限制速度 0.5 ～ 1.0
-  // ====================================
+  // 限制最低 0.5
 
   if (
     newRate < 0.5
@@ -939,6 +967,9 @@ function setSpeechRate(rate) {
 
   }
 
+
+  // 限制最高 1.0
+
   else if (
     newRate > 1.0
   ) {
@@ -947,6 +978,7 @@ function setSpeechRate(rate) {
       1.0;
 
   }
+
 
   else {
 
@@ -962,17 +994,13 @@ function setSpeechRate(rate) {
   );
 
 
-  // ====================================
-  // 更新速度按鈕
-  // ====================================
+  // 立即更新速度按鈕高亮
 
   updateSpeedButtons();
 
 
-  // ====================================
   // 如果正在播放
-  // 重新播放
-  // ====================================
+  // 立即使用新速度重新播放
 
   if (
     "speechSynthesis" in window &&
@@ -987,92 +1015,24 @@ function setSpeechRate(rate) {
 
 
 // ========================================
-// 更新速度按鈕高亮
-// ========================================
-
-function updateSpeedButtons() {
-
-  const buttons =
-    document.querySelectorAll(
-      ".speed-buttons button"
-    );
-
-
-  if (
-    !buttons ||
-    buttons.length === 0
-  ) {
-
-    return;
-
-  }
-
-
-  buttons.forEach(
-    function (button) {
-
-      const rate =
-        Number(
-          button.dataset.rate
-        );
-
-
-      if (
-        rate === speechRate
-      ) {
-
-        button.classList.add(
-          "active-speed"
-        );
-
-      }
-
-      else {
-
-        button.classList.remove(
-          "active-speed"
-        );
-
-      }
-
-    }
-  );
-
-}
-
-
-// ========================================
 // 網頁載入完成
 // ========================================
 
-window.addEventListener(
-  "DOMContentLoaded",
+window.onload =
   function () {
 
-    console.log(
-      "English Library V1 啟動"
-    );
-
-
-    // ==================================
-    // 載入語音
-    // ==================================
+    // 取得系統語音
 
     loadVoices();
 
 
-    // ==================================
-    // 載入 Google Sheet
-    // ==================================
-
-    loadLibrary();
-
-
-    // ==================================
-    // 初始化速度按鈕
-    // ==================================
+    // 更新速度按鈕
 
     updateSpeedButtons();
 
-  }
-);
+
+    // 載入 Google Sheet
+
+    loadLibrary();
+
+  };
