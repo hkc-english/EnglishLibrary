@@ -41,24 +41,28 @@ href="style.css">
 <div class="toolbar">
 
 <button
+type="button"
 onclick="changeShow('en')">
 英文
 </button>
 
 
 <button
+type="button"
 onclick="changeShow('zh')">
 中文
 </button>
 
 
 <button
+type="button"
 onclick="changeShow('both')">
 英＋中
 </button>
 
 
 <button
+type="button"
 onclick="blindMode()">
 盲聽
 </button>
@@ -84,25 +88,28 @@ Loading...
 
 
 <!-- ========================================
-     單句播放控制
+     上一句 / 播放 / 下一句
 ======================================== -->
 
 <div class="controls">
 
 
 <button
+type="button"
 onclick="previousSentence()">
 ⬅ 上一句
 </button>
 
 
 <button
+type="button"
 onclick="speak()">
 🔊 播放
 </button>
 
 
 <button
+type="button"
 onclick="nextSentence()">
 下一句 ➡
 </button>
@@ -112,7 +119,7 @@ onclick="nextSentence()">
 
 
 <!-- ========================================
-     連續／隨機播放控制
+     連續播放 / 停止 / 隨機播放
 ======================================== -->
 
 <div class="playback-controls">
@@ -120,6 +127,7 @@ onclick="nextSentence()">
 
 <button
 id="continuousButton"
+type="button"
 onclick="startContinuousPlay()">
 ▶️ 連續播放
 </button>
@@ -127,6 +135,7 @@ onclick="startContinuousPlay()">
 
 <button
 id="stopButton"
+type="button"
 onclick="stopContinuousPlay()">
 ⏹️ 停止
 </button>
@@ -134,6 +143,7 @@ onclick="stopContinuousPlay()">
 
 <button
 id="randomButton"
+type="button"
 onclick="startRandomPlay()">
 🔀 隨機播放
 </button>
@@ -169,6 +179,7 @@ onclick="startRandomPlay()">
 class="speed-button"
 id="speed05"
 data-rate="0.5"
+type="button"
 onclick="setSpeechRate(0.5)">
 0.5x
 </button>
@@ -178,6 +189,7 @@ onclick="setSpeechRate(0.5)">
 class="speed-button"
 id="speed07"
 data-rate="0.7"
+type="button"
 onclick="setSpeechRate(0.7)">
 0.7x
 </button>
@@ -187,6 +199,7 @@ onclick="setSpeechRate(0.7)">
 class="speed-button"
 id="speed10"
 data-rate="1.0"
+type="button"
 onclick="setSpeechRate(1.0)">
 1.0x
 </button>
