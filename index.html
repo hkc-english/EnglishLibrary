@@ -15,19 +15,25 @@ href="style.css">
 
 </head>
 
+
 <body>
 
 <div class="container">
+
 
 <h1>
 📚 English Library
 </h1>
 
 
+<!-- 資料筆數 -->
+
 <div id="count"></div>
 
 
-<!-- 顯示模式 -->
+<!-- ========================================
+     顯示模式
+======================================== -->
 
 <div class="toolbar">
 
@@ -50,7 +56,9 @@ href="style.css">
 </div>
 
 
-<!-- 目前句子 -->
+<!-- ========================================
+     目前句子
+======================================== -->
 
 <div id="card">
 
@@ -64,7 +72,9 @@ Loading...
 </div>
 
 
-<!-- 操作按鈕 -->
+<!-- ========================================
+     上一句 / 播放 / 下一句
+======================================== -->
 
 <div class="controls">
 
@@ -83,7 +93,9 @@ Loading...
 </div>
 
 
-<!-- 播放速度 -->
+<!-- ========================================
+     播放速度
+======================================== -->
 
 <div class="speed-control">
 
@@ -94,17 +106,28 @@ Loading...
 
 <div class="speed-buttons">
 
-<button onclick="setSpeechRate(0.5)">
+
+<button
+id="speed05"
+onclick="setSpeechRate(0.5)">
 0.5x
 </button>
 
-<button onclick="setSpeechRate(0.7)">
+
+<button
+id="speed07"
+onclick="setSpeechRate(0.7)"
+class="active-speed">
 0.7x
 </button>
 
-<button onclick="setSpeechRate(1.0)">
+
+<button
+id="speed10"
+onclick="setSpeechRate(1.0)">
 1.0x
 </button>
+
 
 </div>
 
@@ -115,6 +138,7 @@ Loading...
 
 
 <script src="app.js"></script>
+
 
 </body>
 
