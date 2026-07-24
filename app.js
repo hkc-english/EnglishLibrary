@@ -1,4 +1,4 @@
-console.log("English Library V1 - Final Playback Upgrade");
+console.log("English Library V1 - Full Playback System");
 
 
 // ========================================
@@ -6,7 +6,7 @@ console.log("English Library V1 - Final Playback Upgrade");
 // ========================================
 
 const API_URL =
-  "https://script.google.com/macros/s/AKfycbzIcTcSbfJQH-TlrFmZ7fQ_Hwq99XBhkvK3CAhJC48nLMz5gD6ScBNYT1PZNNSPx_Qw7A/exec";
+  "https://script.google.com/macros/s/AKfycbzIcTcSbfJQH-TlrFmZ7fQ_QHwq99XBhkvK3CAhJC48nLMz5gD6ScBNYT1PZNNSPx_Qw7A/exec";
 
 
 // ========================================
@@ -52,18 +52,20 @@ let selectedVoice = null;
 
 let isSpeaking = false;
 
+let isPaused = false;
+
 let currentUtterance = null;
 
 
 // ========================================
-// 連續播放狀態
+// 連續播放
 // ========================================
 
 let isContinuousPlaying = false;
 
 
 // ========================================
-// 隨機播放狀態
+// 隨機播放
 // ========================================
 
 let isRandomPlaying = false;
@@ -72,27 +74,19 @@ let isRandomPlaying = false;
 // ========================================
 // 播放間隔
 //
-// 每句播放完後等待幾毫秒
-// 再播放下一句
-//
-// 1500 = 1.5 秒
+// 預設 3 秒
 // ========================================
 
-const PLAYBACK_INTERVAL = 1500;
-
-
-// ========================================
-// 連續／隨機播放計時器
-// ========================================
+let playbackInterval = 3000;
 
 let playbackTimer = null;
 
 
 // ========================================
-// 播放 Session
+// 播放代號
 //
-// 防止舊的語音 onend
-// 在停止後又偷偷啟動下一句
+// 防止舊的 onend
+// 在停止後重新觸發播放
 // ========================================
 
 let playbackSession = 0;
@@ -148,14 +142,12 @@ async function loadLibrary() {
     );
 
 
-    // 載入語音
+    // 載入系統語音
 
     loadVoices();
 
 
-    // ======================================
     // 保護目前索引
-    // ======================================
 
     if (
       library.length === 0
@@ -177,9 +169,7 @@ async function loadLibrary() {
     }
 
 
-    // ======================================
     // 更新畫面
-    // ======================================
 
     render();
 
@@ -243,9 +233,7 @@ function loadVoices() {
   }
 
 
-  // ======================================
   // 只找英文語音
-  // ======================================
 
   const englishVoices =
     voices.filter(
@@ -275,9 +263,7 @@ function loadVoices() {
   }
 
 
-  // ======================================
   // 優先選擇較自然的語音
-  // ======================================
 
   const preferredNames = [
 
@@ -301,10 +287,6 @@ function loadVoices() {
 
   ];
 
-
-  // ======================================
-  // 搜尋指定語音
-  // ======================================
 
   for (
     let i = 0;
@@ -350,10 +332,8 @@ function loadVoices() {
   }
 
 
-  // ======================================
   // 找不到指定語音
   // 使用第一個英文語音
-  // ======================================
 
   selectedVoice =
     englishVoices[0];
@@ -388,7 +368,7 @@ if (
 
 
 // ========================================
-// 清除播放計時器
+// 清除等待中的播放計時器
 // ========================================
 
 function clearPlaybackTimer() {
@@ -401,6 +381,7 @@ function clearPlaybackTimer() {
       playbackTimer
     );
 
+
     playbackTimer =
       null;
 
@@ -410,23 +391,13 @@ function clearPlaybackTimer() {
 
 
 // ========================================
-// 停止目前語音
+// 停止語音
 //
-// 注意：
-// 這個函式只負責停止語音
-//
-// 是否停止「連續／隨機模式」
-// 由其他函式決定
+// 只停止目前這一句
+// 不直接關閉連續／隨機播放
 // ========================================
 
 function stopSpeech() {
-
-  // 先讓舊的播放 Session 失效
-
-  playbackSession++;
-
-
-  // 清除等待中的下一句計時器
 
   clearPlaybackTimer();
 
@@ -455,11 +426,64 @@ function stopSpeech() {
     false;
 
 
+  isPaused =
+    false;
+
+
   currentUtterance =
     null;
 
 
   updatePlaybackStatus();
+
+  updatePauseButton();
+
+}
+
+
+// ========================================
+// 完全停止所有播放
+//
+// 停止：
+// 1. 目前語音
+// 2. 連續播放
+// 3. 隨機播放
+// 4. 等待中的間隔計時器
+// ========================================
+
+function stopAllPlayback() {
+
+  console.log(
+    "⏹ 完全停止所有播放"
+  );
+
+
+  // 先增加播放代號
+  // 讓舊的 onend 失效
+
+  playbackSession++;
+
+
+  // 關閉自動播放
+
+  isContinuousPlaying =
+    false;
+
+
+  isRandomPlaying =
+    false;
+
+
+  // 停止語音
+
+  stopSpeech();
+
+
+  // 更新畫面狀態
+
+  updatePlaybackStatus();
+
+  updatePauseButton();
 
 }
 
@@ -511,23 +535,28 @@ function speak() {
   }
 
 
-  console.log(
-    "播放：",
-    text
-  );
+  // 每次開始新的語音
+  // 先清除舊計時器
+
+  clearPlaybackTimer();
 
 
-  // ======================================
-  // 建立新的播放 Session
-  // ======================================
+  // 停止舊語音
 
-  const session =
-    playbackSession;
+  try {
+
+    window.speechSynthesis.cancel();
+
+  } catch (error) {
+
+    console.error(
+      error
+    );
+
+  }
 
 
-  // ======================================
-  // 建立語音
-  // ======================================
+  // 建立新的語音
 
   const utterance =
     new SpeechSynthesisUtterance(
@@ -539,41 +568,31 @@ function speak() {
     utterance;
 
 
-  // ======================================
   // 語言
-  // ======================================
 
   utterance.lang =
     "en-US";
 
 
-  // ======================================
   // 播放速度
-  // ======================================
 
   utterance.rate =
     speechRate;
 
 
-  // ======================================
   // 音調
-  // ======================================
 
   utterance.pitch =
     1;
 
 
-  // ======================================
   // 音量
-  // ======================================
 
   utterance.volume =
     1;
 
 
-  // ======================================
   // 指定語音
-  // ======================================
 
   if (selectedVoice) {
 
@@ -583,6 +602,12 @@ function speak() {
   }
 
 
+  // 記錄本次播放代號
+
+  const session =
+    playbackSession;
+
+
   // ======================================
   // 語音開始
   // ======================================
@@ -590,11 +615,12 @@ function speak() {
   utterance.onstart =
     function () {
 
-      // 如果 Session 已經失效
-      // 代表這個語音已經不應該播放
+      // 如果已經不是目前播放工作階段
+      // 直接忽略
 
       if (
-        session !== playbackSession
+        session !==
+        playbackSession
       ) {
 
         return;
@@ -606,7 +632,13 @@ function speak() {
         true;
 
 
+      isPaused =
+        false;
+
+
       updatePlaybackStatus();
+
+      updatePauseButton();
 
 
       console.log(
@@ -617,17 +649,17 @@ function speak() {
 
 
   // ======================================
-  // 語音播放完成
+  // 語音完成
   // ======================================
 
   utterance.onend =
     function () {
 
-      // 如果不是目前有效的播放 Session
-      // 不做任何事情
+      // 舊播放事件直接忽略
 
       if (
-        session !== playbackSession
+        session !==
+        playbackSession
       ) {
 
         return;
@@ -639,16 +671,22 @@ function speak() {
         false;
 
 
+      isPaused =
+        false;
+
+
       currentUtterance =
         null;
+
+
+      updatePlaybackStatus();
+
+      updatePauseButton();
 
 
       console.log(
         "⏹ 播放完成"
       );
-
-
-      updatePlaybackStatus();
 
 
       // ====================================
@@ -688,17 +726,17 @@ function speak() {
 
 
   // ======================================
-  // 語音播放錯誤
+  // 語音錯誤
   // ======================================
 
   utterance.onerror =
     function (event) {
 
-      // 如果 Session 已經失效
-      // 不處理舊事件
+      // 舊事件忽略
 
       if (
-        session !== playbackSession
+        session !==
+        playbackSession
       ) {
 
         return;
@@ -707,6 +745,10 @@ function speak() {
 
 
       isSpeaking =
+        false;
+
+
+      isPaused =
         false;
 
 
@@ -721,6 +763,8 @@ function speak() {
 
 
       updatePlaybackStatus();
+
+      updatePauseButton();
 
     };
 
@@ -822,7 +866,7 @@ function render() {
 
     updateSpeedButtons();
 
-    updatePlaybackStatus();
+    updateIntervalButtons();
 
 
     return;
@@ -982,7 +1026,7 @@ function render() {
 
   updateSpeedButtons();
 
-  updatePlaybackStatus();
+  updateIntervalButtons();
 
 
   console.log(
@@ -996,20 +1040,9 @@ function render() {
 // ========================================
 // 設定顯示模式
 //
-// 重要：
-// 切換模式不會停止播放
-//
-// 例如：
-//
-// 英文模式
-// ↓
-// 連續播放中
-// ↓
-// 切換中文
-//
-// 語音仍然繼續播放
-//
-// 只改變畫面顯示
+// 注意：
+// 切換英文／中文／英＋中／盲聽
+// 不會停止連續播放或隨機播放
 // ========================================
 
 function setMode(mode) {
@@ -1021,10 +1054,12 @@ function setMode(mode) {
 
 
   // ======================================
-  // 不停止語音
-  // 不停止連續播放
-  // 不停止隨機播放
+  // 只停止目前這一句
+  //
+  // 不關閉連續／隨機播放
   // ======================================
+
+  stopSpeech();
 
 
   // ======================================
@@ -1080,16 +1115,80 @@ function setMode(mode) {
 
 
   // ======================================
-  // 只重新顯示畫面
-  // 不重新播放
+  // 更新畫面
   // ======================================
 
   render();
 
 
   // ======================================
-  // 更新狀態
+  // 如果原本是連續播放或隨機播放
+  //
+  // 切換模式後繼續播放目前句子
   // ======================================
+
+  if (
+    isContinuousPlaying ||
+    isRandomPlaying
+  ) {
+
+    const session =
+      playbackSession;
+
+
+    setTimeout(
+      function () {
+
+        if (
+          session !==
+          playbackSession
+        ) {
+
+          return;
+
+        }
+
+
+        if (
+          isContinuousPlaying ||
+          isRandomPlaying
+        ) {
+
+          speak();
+
+        }
+
+      },
+      150
+    );
+
+
+    return;
+
+  }
+
+
+  // ======================================
+  // 如果單純切換到盲聽
+  //
+  // 自動播放目前句子
+  // ======================================
+
+  if (
+    showMode === "listen"
+  ) {
+
+    setTimeout(
+      function () {
+
+        speak();
+
+      },
+      150
+    );
+
+  }
+
 
   updatePlaybackStatus();
 
@@ -1125,12 +1224,8 @@ function blindMode() {
 // ========================================
 // 下一句
 //
-// 手動按下一句：
-// 1. 停止目前播放
-// 2. 停止連續播放
-// 3. 停止隨機播放
-// 4. 移動到下一句
-// 5. 立即播放
+// 手動按下一句
+// 會停止連續／隨機播放
 // ========================================
 
 function nextSentence() {
@@ -1150,9 +1245,7 @@ function nextSentence() {
   );
 
 
-  // ======================================
-  // 停止自動播放模式
-  // ======================================
+  // 停止所有自動播放
 
   isContinuousPlaying =
     false;
@@ -1161,16 +1254,17 @@ function nextSentence() {
     false;
 
 
-  // ======================================
   // 停止目前語音
-  // ======================================
 
   stopSpeech();
 
 
-  // ======================================
+  // 增加播放代號
+
+  playbackSession++;
+
+
   // 下一筆
-  // ======================================
 
   currentIndex =
     currentIndex + 1;
@@ -1187,18 +1281,21 @@ function nextSentence() {
   }
 
 
-  // ======================================
   // 更新畫面
-  // ======================================
 
   render();
 
 
-  // ======================================
   // 播放
-  // ======================================
 
-  speak();
+  setTimeout(
+    function () {
+
+      speak();
+
+    },
+    150
+  );
 
 
   updatePlaybackStatus();
@@ -1209,12 +1306,8 @@ function nextSentence() {
 // ========================================
 // 上一句
 //
-// 手動按上一句：
-// 1. 停止目前播放
-// 2. 停止連續播放
-// 3. 停止隨機播放
-// 4. 移動到上一句
-// 5. 立即播放
+// 手動按上一句
+// 會停止連續／隨機播放
 // ========================================
 
 function previousSentence() {
@@ -1234,9 +1327,7 @@ function previousSentence() {
   );
 
 
-  // ======================================
-  // 停止自動播放模式
-  // ======================================
+  // 停止所有自動播放
 
   isContinuousPlaying =
     false;
@@ -1245,16 +1336,17 @@ function previousSentence() {
     false;
 
 
-  // ======================================
-  // 停止語音
-  // ======================================
+  // 停止目前語音
 
   stopSpeech();
 
 
-  // ======================================
+  // 增加播放代號
+
+  playbackSession++;
+
+
   // 上一筆
-  // ======================================
 
   currentIndex =
     currentIndex - 1;
@@ -1270,21 +1362,160 @@ function previousSentence() {
   }
 
 
-  // ======================================
   // 更新畫面
-  // ======================================
 
   render();
 
 
-  // ======================================
   // 播放
-  // ======================================
 
-  speak();
+  setTimeout(
+    function () {
+
+      speak();
+
+    },
+    150
+  );
 
 
   updatePlaybackStatus();
+
+}
+
+
+// ========================================
+// 暫停／繼續
+// ========================================
+
+function togglePause() {
+
+  if (
+    !("speechSynthesis" in window)
+  ) {
+
+    return;
+
+  }
+
+
+  // ======================================
+  // 正在播放
+  // → 暫停
+  // ======================================
+
+  if (
+    isSpeaking &&
+    !isPaused
+  ) {
+
+    try {
+
+      window.speechSynthesis.pause();
+
+      isPaused =
+        true;
+
+
+      console.log(
+        "⏸ 暫停播放"
+      );
+
+
+      updatePlaybackStatus();
+
+      updatePauseButton();
+
+    } catch (error) {
+
+      console.error(
+        "暫停失敗：",
+        error
+      );
+
+    }
+
+
+    return;
+
+  }
+
+
+  // ======================================
+  // 已暫停
+  // → 繼續
+  // ======================================
+
+  if (
+    isSpeaking &&
+    isPaused
+  ) {
+
+    try {
+
+      window.speechSynthesis.resume();
+
+      isPaused =
+        false;
+
+
+      console.log(
+        "▶️ 繼續播放"
+      );
+
+
+      updatePlaybackStatus();
+
+      updatePauseButton();
+
+    } catch (error) {
+
+      console.error(
+        "繼續播放失敗：",
+        error
+      );
+
+    }
+
+  }
+
+}
+
+
+// ========================================
+// 更新暫停按鈕文字
+// ========================================
+
+function updatePauseButton() {
+
+  const button =
+    document.getElementById(
+      "pauseButton"
+    );
+
+
+  if (!button) {
+
+    return;
+
+  }
+
+
+  if (
+    isPaused
+  ) {
+
+    button.innerText =
+      "▶️ 繼續";
+
+  }
+
+  else {
+
+    button.innerText =
+      "⏸ 暫停";
+
+  }
 
 }
 
@@ -1310,123 +1541,48 @@ function startContinuousPlay() {
   );
 
 
-  // ======================================
-  // 停止目前播放
-  // ======================================
+  // 新播放工作階段
+
+  playbackSession++;
+
+
+  // 清除等待計時器
+
+  clearPlaybackTimer();
+
+
+  // 停止目前語音
 
   stopSpeech();
 
 
-  // ======================================
   // 關閉隨機播放
-  // ======================================
 
   isRandomPlaying =
     false;
 
 
-  // ======================================
   // 開啟連續播放
-  // ======================================
 
   isContinuousPlaying =
     true;
 
 
-  // ======================================
   // 更新狀態
-  // ======================================
 
   updatePlaybackStatus();
 
 
-  // ======================================
   // 播放目前句子
-  // ======================================
 
-  speak();
+  setTimeout(
+    function () {
 
-}
+      speak();
 
-
-// ========================================
-// 連續播放下一句
-// ========================================
-
-function scheduleNextContinuous(
-  session
-) {
-
-  // ======================================
-  // 確認仍然是連續播放
-  // ======================================
-
-  if (
-    !isContinuousPlaying
-  ) {
-
-    return;
-
-  }
-
-
-  // ======================================
-  // 確認 Session 沒有失效
-  // ======================================
-
-  if (
-    session !== playbackSession
-  ) {
-
-    return;
-
-  }
-
-
-  console.log(
-    "連續播放：",
-    PLAYBACK_INTERVAL,
-    "毫秒後播放下一句"
+    },
+    150
   );
-
-
-  // ======================================
-  // 等待後播放下一句
-  // ======================================
-
-  playbackTimer =
-    setTimeout(
-      function () {
-
-        playbackTimer =
-          null;
-
-
-        // 再次確認狀態
-
-        if (
-          !isContinuousPlaying
-        ) {
-
-          return;
-
-        }
-
-
-        if (
-          session !== playbackSession
-        ) {
-
-          return;
-
-        }
-
-
-        playNextContinuous();
-
-      },
-      PLAYBACK_INTERVAL
-    );
 
 }
 
@@ -1456,79 +1612,66 @@ function playNextContinuous() {
   }
 
 
-  // ======================================
-  // 下一句
-  // ======================================
-
-  currentIndex =
-    currentIndex + 1;
-
-
-  // ======================================
-  // 循環到第一句
-  // ======================================
-
-  if (
-    currentIndex >=
-    library.length
-  ) {
-
-    currentIndex =
-      0;
-
-  }
-
-
-  // ======================================
-  // 更新畫面
-  // ======================================
-
-  render();
-
-
-  // ======================================
-  // 播放
-  // ======================================
-
-  speak();
-
-}
-
-
-// ========================================
-// 停止連續／隨機播放
-// ========================================
-
-function stopContinuousPlay() {
-
   console.log(
-    "⏹ 停止播放"
+    "連續播放：等待",
+    playbackInterval,
+    "毫秒"
   );
 
 
-  // ======================================
-  // 先關閉自動播放狀態
-  // ======================================
+  // 等待指定秒數
 
-  isContinuousPlaying =
-    false;
+  playbackTimer =
+    setTimeout(
+      function () {
 
-  isRandomPlaying =
-    false;
-
-
-  // ======================================
-  // 停止語音
-  // ======================================
-
-  stopSpeech();
+        playbackTimer =
+          null;
 
 
-  // ======================================
-  // 更新狀態
-  // ======================================
+        // 再次確認
+        // 使用者可能已經停止播放
 
-  updatePlaybackStatus();
+        if (
+          !isContinuousPlaying
+        ) {
+
+          return;
+
+        }
+
+
+        // 下一句
+
+        currentIndex =
+          currentIndex + 1;
+
+
+        // 循環到第一句
+
+        if (
+          currentIndex >=
+          library.length
+        ) {
+
+          currentIndex =
+            0;
+
+        }
+
+
+        // 更新畫面
+
+        render();
+
+
+        // 播放
+
+        speak();
+
+      },
+      playbackInterval
+    );
 
 }
 
@@ -1554,61 +1697,64 @@ function startRandomPlay() {
   );
 
 
-  // ======================================
+  // 新播放工作階段
+
+  playbackSession++;
+
+
+  // 清除等待計時器
+
+  clearPlaybackTimer();
+
+
   // 停止目前語音
-  // ======================================
 
   stopSpeech();
 
 
-  // ======================================
   // 關閉連續播放
-  // ======================================
 
   isContinuousPlaying =
     false;
 
 
-  // ======================================
   // 開啟隨機播放
-  // ======================================
 
   isRandomPlaying =
     true;
 
 
-  // ======================================
   // 選擇隨機句子
-  // ======================================
 
   chooseRandomSentence();
 
 
-  // ======================================
   // 更新畫面
-  // ======================================
 
   render();
 
 
-  // ======================================
   // 更新狀態
-  // ======================================
 
   updatePlaybackStatus();
 
 
-  // ======================================
   // 開始播放
-  // ======================================
 
-  speak();
+  setTimeout(
+    function () {
+
+      speak();
+
+    },
+    150
+  );
 
 }
 
 
 // ========================================
-// 選擇隨機句子
+// 隨機選擇句子
 // ========================================
 
 function chooseRandomSentence() {
@@ -1651,86 +1797,6 @@ function chooseRandomSentence() {
 
 
 // ========================================
-// 隨機播放下一句排程
-// ========================================
-
-function scheduleNextRandom(
-  session
-) {
-
-  // ======================================
-  // 確認仍然是隨機播放
-  // ======================================
-
-  if (
-    !isRandomPlaying
-  ) {
-
-    return;
-
-  }
-
-
-  // ======================================
-  // 確認 Session
-  // ======================================
-
-  if (
-    session !== playbackSession
-  ) {
-
-    return;
-
-  }
-
-
-  console.log(
-    "隨機播放：",
-    PLAYBACK_INTERVAL,
-    "毫秒後播放下一句"
-  );
-
-
-  // ======================================
-  // 等待後播放下一句
-  // ======================================
-
-  playbackTimer =
-    setTimeout(
-      function () {
-
-        playbackTimer =
-          null;
-
-
-        if (
-          !isRandomPlaying
-        ) {
-
-          return;
-
-        }
-
-
-        if (
-          session !== playbackSession
-        ) {
-
-          return;
-
-        }
-
-
-        playNextRandom();
-
-      },
-      PLAYBACK_INTERVAL
-    );
-
-}
-
-
-// ========================================
 // 隨機播放下一句
 // ========================================
 
@@ -1755,25 +1821,51 @@ function playNextRandom() {
   }
 
 
-  // ======================================
-  // 選擇新的隨機句子
-  // ======================================
-
-  chooseRandomSentence();
-
-
-  // ======================================
-  // 更新畫面
-  // ======================================
-
-  render();
+  console.log(
+    "隨機播放：等待",
+    playbackInterval,
+    "毫秒"
+  );
 
 
-  // ======================================
-  // 播放
-  // ======================================
+  // 等待設定的間隔
 
-  speak();
+  playbackTimer =
+    setTimeout(
+      function () {
+
+        playbackTimer =
+          null;
+
+
+        // 確認仍然是隨機播放
+
+        if (
+          !isRandomPlaying
+        ) {
+
+          return;
+
+        }
+
+
+        // 選擇新的隨機句子
+
+        chooseRandomSentence();
+
+
+        // 更新畫面
+
+        render();
+
+
+        // 播放
+
+        speak();
+
+      },
+      playbackInterval
+    );
 
 }
 
@@ -1797,9 +1889,7 @@ function setSpeechRate(rate) {
   }
 
 
-  // ======================================
   // 最低 0.5
-  // ======================================
 
   if (
     newRate < 0.5
@@ -1811,9 +1901,7 @@ function setSpeechRate(rate) {
   }
 
 
-  // ======================================
   // 最高 1.0
-  // ======================================
 
   else if (
     newRate > 1.0
@@ -1839,24 +1927,18 @@ function setSpeechRate(rate) {
   );
 
 
-  // ======================================
   // 更新速度按鈕
-  // ======================================
 
   updateSpeedButtons();
 
 
-  // ======================================
   // 如果正在播放
-  // 重新用新速度播放
-  // ======================================
+  // 重新播放目前句子
 
   if (
-    isSpeaking
+    isSpeaking &&
+    !isPaused
   ) {
-
-    // 保存目前自動播放狀態
-    // 不要因為調速而停止連續／隨機模式
 
     const wasContinuous =
       isContinuousPlaying;
@@ -1865,13 +1947,10 @@ function setSpeechRate(rate) {
       isRandomPlaying;
 
 
-    // 停止目前語音
-    // 但不能讓自動播放模式失效
-
     stopSpeech();
 
 
-    // 恢復自動播放狀態
+    // 保留自動播放狀態
 
     isContinuousPlaying =
       wasContinuous;
@@ -1880,11 +1959,69 @@ function setSpeechRate(rate) {
       wasRandom;
 
 
-    // 立即重新播放
+    setTimeout(
+      function () {
 
-    speak();
+        speak();
+
+      },
+      100
+    );
 
   }
+
+}
+
+
+// ========================================
+// 設定句子間隔
+// ========================================
+
+function setPlaybackInterval(interval) {
+
+  const newInterval =
+    Number(interval);
+
+
+  if (
+    isNaN(newInterval)
+  ) {
+
+    return;
+
+  }
+
+
+  // 最低 1 秒
+
+  if (
+    newInterval < 1000
+  ) {
+
+    playbackInterval =
+      1000;
+
+  }
+
+
+  else {
+
+    playbackInterval =
+      newInterval;
+
+  }
+
+
+  console.log(
+    "句子間隔：",
+    playbackInterval,
+    "毫秒"
+  );
+
+
+  // 更新間隔按鈕
+
+  updateIntervalButtons();
 
 }
 
@@ -1928,6 +2065,55 @@ function updateSpeedButtons() {
 
         button.classList.add(
           "active-speed"
+        );
+
+      }
+
+    }
+  );
+
+}
+
+
+// ========================================
+// 更新句子間隔按鈕高亮
+// ========================================
+
+function updateIntervalButtons() {
+
+  const buttons =
+    document.querySelectorAll(
+      ".interval-button"
+    );
+
+
+  buttons.forEach(
+    function (button) {
+
+      button.classList.remove(
+        "active-interval"
+      );
+
+    }
+  );
+
+
+  buttons.forEach(
+    function (button) {
+
+      const interval =
+        Number(
+          button.dataset.interval
+        );
+
+
+      if (
+        interval ===
+        playbackInterval
+      ) {
+
+        button.classList.add(
+          "active-interval"
         );
 
       }
@@ -2024,7 +2210,7 @@ function updateModeButtons() {
 
 
 // ========================================
-// 更新播放狀態文字
+// 更新播放狀態
 // ========================================
 
 function updatePlaybackStatus() {
@@ -2042,41 +2228,109 @@ function updatePlaybackStatus() {
   }
 
 
+  // 連續播放
+
   if (
     isContinuousPlaying
   ) {
 
-    status.innerText =
-      "▶️ 連續播放中";
+    if (
+      isPaused
+    ) {
+
+      status.innerText =
+        "⏸ 連續播放已暫停";
+
+    }
+
+    else if (
+      isSpeaking
+    ) {
+
+      status.innerText =
+        "▶️ 連續播放中";
+
+    }
+
+    else {
+
+      status.innerText =
+        "⏳ 連續播放準備中";
+
+    }
+
 
     return;
 
   }
 
+
+  // 隨機播放
 
   if (
     isRandomPlaying
   ) {
 
-    status.innerText =
-      "🔀 隨機播放中";
+    if (
+      isPaused
+    ) {
+
+      status.innerText =
+        "⏸ 隨機播放已暫停";
+
+    }
+
+    else if (
+      isSpeaking
+    ) {
+
+      status.innerText =
+        "🔀 隨機播放中";
+
+    }
+
+    else {
+
+      status.innerText =
+        "⏳ 隨機播放準備中";
+
+    }
+
 
     return;
 
   }
 
+
+  // 一般播放
 
   if (
     isSpeaking
   ) {
 
-    status.innerText =
-      "🔊 播放中";
+    if (
+      isPaused
+    ) {
+
+      status.innerText =
+        "⏸ 已暫停";
+
+    }
+
+    else {
+
+      status.innerText =
+        "🔊 播放中";
+
+    }
+
 
     return;
 
   }
 
+
+  // 沒有播放
 
   status.innerText =
     "";
@@ -2229,10 +2483,6 @@ async function addSentence() {
     chineseInput.value.trim();
 
 
-  // ======================================
-  // 檢查英文
-  // ======================================
-
   if (!english) {
 
     if (message) {
@@ -2249,10 +2499,6 @@ async function addSentence() {
   }
 
 
-  // ======================================
-  // 檢查中文
-  // ======================================
-
   if (!chinese) {
 
     if (message) {
@@ -2268,10 +2514,6 @@ async function addSentence() {
 
   }
 
-
-  // ======================================
-  // 顯示儲存中
-  // ======================================
 
   if (message) {
 
@@ -2291,10 +2533,6 @@ async function addSentence() {
 
   }
 
-
-  // ======================================
-  // 建立請求資料
-  // ======================================
 
   const requestData = {
 
@@ -2327,10 +2565,6 @@ async function addSentence() {
 
   try {
 
-    // ====================================
-    // 發送到 Google Apps Script
-    // ====================================
-
     const response =
       await fetch(
         API_URL,
@@ -2355,10 +2589,6 @@ async function addSentence() {
       );
 
 
-    // ====================================
-    // 取得結果
-    // ====================================
-
     const result =
       await response.json();
 
@@ -2368,10 +2598,6 @@ async function addSentence() {
       result
     );
 
-
-    // ====================================
-    // 判斷是否成功
-    // ====================================
 
     if (
       !result.success
@@ -2385,10 +2611,6 @@ async function addSentence() {
     }
 
 
-    // ====================================
-    // 顯示成功
-    // ====================================
-
     if (message) {
 
       message.innerText =
@@ -2396,10 +2618,6 @@ async function addSentence() {
 
     }
 
-
-    // ====================================
-    // 重新載入資料
-    // ====================================
 
     setTimeout(
       async function () {
@@ -2475,37 +2693,37 @@ window.onload =
     );
 
 
-    // ======================================
     // 載入語音
-    // ======================================
 
     loadVoices();
 
 
-    // ======================================
     // 初始化速度按鈕
-    // ======================================
 
     updateSpeedButtons();
 
 
-    // ======================================
+    // 初始化句子間隔
+
+    updateIntervalButtons();
+
+
     // 初始化模式按鈕
-    // ======================================
 
     updateModeButtons();
 
 
-    // ======================================
     // 初始化播放狀態
-    // ======================================
 
     updatePlaybackStatus();
 
 
-    // ======================================
+    // 初始化暫停按鈕
+
+    updatePauseButton();
+
+
     // 載入 Google Sheet
-    // ======================================
 
     loadLibrary();
 
