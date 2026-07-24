@@ -30,8 +30,7 @@ href="style.css">
      資料筆數
 ======================================== -->
 
-<div id="count">
-</div>
+<div id="count"></div>
 
 
 <!-- ========================================
@@ -41,28 +40,21 @@ href="style.css">
 <div class="toolbar">
 
 <button
-type="button"
 onclick="changeShow('en')">
 英文
 </button>
 
-
 <button
-type="button"
 onclick="changeShow('zh')">
 中文
 </button>
 
-
 <button
-type="button"
 onclick="changeShow('both')">
 英＋中
 </button>
 
-
 <button
-type="button"
 onclick="blindMode()">
 盲聽
 </button>
@@ -80,7 +72,6 @@ onclick="blindMode()">
 Loading...
 </div>
 
-
 <div id="chinese">
 </div>
 
@@ -88,28 +79,25 @@ Loading...
 
 
 <!-- ========================================
-     上一句 / 播放 / 下一句
+     播放控制
 ======================================== -->
 
 <div class="controls">
 
 
 <button
-type="button"
 onclick="previousSentence()">
 ⬅ 上一句
 </button>
 
 
 <button
-type="button"
 onclick="speak()">
 🔊 播放
 </button>
 
 
 <button
-type="button"
 onclick="nextSentence()">
 下一句 ➡
 </button>
@@ -119,33 +107,23 @@ onclick="nextSentence()">
 
 
 <!-- ========================================
-     連續播放 / 停止 / 隨機播放
+     暫停 / 停止
 ======================================== -->
 
 <div class="playback-controls">
 
 
 <button
-id="continuousButton"
-type="button"
-onclick="startContinuousPlay()">
-▶️ 連續播放
+id="pauseButton"
+onclick="togglePause()">
+⏸ 暫停
 </button>
 
 
 <button
 id="stopButton"
-type="button"
-onclick="stopContinuousPlay()">
-⏹️ 停止
-</button>
-
-
-<button
-id="randomButton"
-type="button"
-onclick="startRandomPlay()">
-🔀 隨機播放
+onclick="stopAllPlayback()">
+⏹ 停止
 </button>
 
 
@@ -156,7 +134,8 @@ onclick="startRandomPlay()">
      播放狀態
 ======================================== -->
 
-<div id="playbackStatus">
+<div
+id="playbackStatus">
 </div>
 
 
@@ -177,9 +156,7 @@ onclick="startRandomPlay()">
 
 <button
 class="speed-button"
-id="speed05"
 data-rate="0.5"
-type="button"
 onclick="setSpeechRate(0.5)">
 0.5x
 </button>
@@ -187,9 +164,7 @@ onclick="setSpeechRate(0.5)">
 
 <button
 class="speed-button"
-id="speed07"
 data-rate="0.7"
-type="button"
 onclick="setSpeechRate(0.7)">
 0.7x
 </button>
@@ -197,9 +172,7 @@ onclick="setSpeechRate(0.7)">
 
 <button
 class="speed-button"
-id="speed10"
 data-rate="1.0"
-type="button"
 onclick="setSpeechRate(1.0)">
 1.0x
 </button>
@@ -210,10 +183,163 @@ onclick="setSpeechRate(1.0)">
 </div>
 
 
+<!-- ========================================
+     連續播放
+======================================== -->
+
+<div class="continuous-control">
+
+
+<button
+onclick="startContinuousPlay()">
+▶️ 連續播放
+</button>
+
+
 </div>
 
 
-<script src="app.js"></script>
+<!-- ========================================
+     隨機播放
+======================================== -->
+
+<div class="random-control">
+
+
+<button
+onclick="startRandomPlay()">
+🔀 隨機播放
+</button>
+
+
+</div>
+
+
+<!-- ========================================
+     連續播放間隔
+======================================== -->
+
+<div class="interval-control">
+
+
+<div class="interval-title">
+句子間隔
+</div>
+
+
+<div class="interval-buttons">
+
+
+<button
+class="interval-button"
+data-interval="1000"
+onclick="setPlaybackInterval(1000)">
+1秒
+</button>
+
+
+<button
+class="interval-button"
+data-interval="2000"
+onclick="setPlaybackInterval(2000)">
+2秒
+</button>
+
+
+<button
+class="interval-button"
+data-interval="3000"
+onclick="setPlaybackInterval(3000)">
+3秒
+</button>
+
+
+<button
+class="interval-button"
+data-interval="5000"
+onclick="setPlaybackInterval(5000)">
+5秒
+</button>
+
+
+</div>
+
+</div>
+
+
+<!-- ========================================
+     新增英文句子
+======================================== -->
+
+<div class="add-section">
+
+
+<button
+onclick="showAddForm()">
+➕ 新增句子
+</button>
+
+
+<div
+id="addForm"
+style="display:none;">
+
+
+<div class="form-title">
+新增英文句子
+</div>
+
+
+<input
+id="newEnglish"
+type="text"
+placeholder="請輸入英文句子">
+
+
+<input
+id="newChinese"
+type="text"
+placeholder="請輸入中文翻譯">
+
+
+<div class="form-buttons">
+
+
+<button
+onclick="addSentence()">
+💾 儲存
+</button>
+
+
+<button
+onclick="hideAddForm()">
+取消
+</button>
+
+
+</div>
+
+
+<div
+id="addMessage">
+</div>
+
+
+</div>
+
+</div>
+
+
+</div>
+
+
+<!-- ========================================
+     JavaScript
+======================================== -->
+
+<script
+src="app.js">
+</script>
 
 
 </body>
